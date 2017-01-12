@@ -16,6 +16,7 @@ var css = [
     'bower_components/bootstrap/dist/css/bootstrap.css',
     'bower_components/angular-material/angular-material.css'
 ];
+var jsApp = ['public/app/main.js', 'public/app/main.controller.js', 'public/app/**/*.js'];
 
 gulp.task('css', function(){
     return gulp.src(css)
@@ -35,7 +36,7 @@ gulp.task('js', function() {
         .pipe(concat('lib.js'))
         .pipe(gulp.dest('public/'));
 
-    gulp.src(['public/app/main.js', 'public/app/main.controller.js', 'public/app/**/*.js'])
+    gulp.src(jsApp)
         .pipe(concat('app.js'))
         .pipe(gulp.dest('public/'))
 });
