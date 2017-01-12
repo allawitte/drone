@@ -40,6 +40,13 @@ gulp.task('js', function() {
         .pipe(concat('app.js'))
         .pipe(gulp.dest('public/'))
 });
+
+gulp.task('app', function(){
+    gulp.src(jsApp)
+        .pipe(concat('app.js'))
+        .pipe(gulp.dest('public/'))
+});
+
 gulp.task('webserver', function() {
     gulp.src('public/')
         .pipe(webserver({
