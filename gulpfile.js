@@ -35,7 +35,7 @@ gulp.task('js', function() {
         .pipe(concat('lib.js'))
         .pipe(gulp.dest('public/'));
 
-    gulp.src(['public/app/*.js', 'public/app/**/*.js'])
+    gulp.src(['public/app/main.js', 'public/app/main.controller.js', 'public/app/**/*.js'])
         .pipe(concat('app.js'))
         .pipe(gulp.dest('public/'))
 });
