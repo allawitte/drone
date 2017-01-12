@@ -20,27 +20,27 @@ var css = [
 gulp.task('css', function(){
     return gulp.src(css)
         .pipe(concat('theme.css'))
-        .pipe(gulp.dest('./'))
+        .pipe(gulp.dest('public/'))
 });
 
 gulp.task('sass', function () {
-    return gulp.src(['./app/*.scss', 'app/**/*.scss'])
+    return gulp.src(['public/app/*.scss', 'public/app/**/*.scss'])
         .pipe(sass().on('error', sass.logError))
-        .pipe(concat('styles.css'))
-        .pipe(gulp.dest('./'));
+        .pipe(concat('style.css'))
+        .pipe(gulp.dest('public/'));
 });
 
 gulp.task('js', function() {
     gulp.src(lib)
         .pipe(concat('lib.js'))
-        .pipe(gulp.dest('./'));
+        .pipe(gulp.dest('public/'));
 
-    gulp.src(['app/*.js', 'app/**/*.js'])
+    gulp.src(['public/app/*.js', 'public/app/**/*.js'])
         .pipe(concat('app.js'))
-        .pipe(gulp.dest('./'))
+        .pipe(gulp.dest('public/'))
 });
 gulp.task('webserver', function() {
-    gulp.src('./')
+    gulp.src('public/')
         .pipe(webserver({
             livereload: true,
             directoryListing: false,

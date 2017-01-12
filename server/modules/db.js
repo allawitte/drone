@@ -20,7 +20,7 @@ var setMenu = function () {
         });
     });
 };
-setMenu();
+//setMenu();
 
 exports.db = db;
 /**
