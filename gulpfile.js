@@ -2,6 +2,7 @@ var gulp = require('gulp');
 var webserver = require('gulp-webserver');
 var concat = require('gulp-concat');
 var sass = require('gulp-sass');
+var watch = require('gulp-watch');
 
 
 var lib = [
@@ -45,6 +46,14 @@ gulp.task('app', function(){
     gulp.src(jsApp)
         .pipe(concat('app.js'))
         .pipe(gulp.dest('public/'))
+});
+
+gulp.task('watch', function () {
+    gulp.watch(['public/app/*.js',
+        'public/app/**/*.js',
+        'public/app/**/*.scss',
+        'public/app/*.scss'
+    ],['app', 'sass']);
 });
 
 gulp.task('webserver', function() {
