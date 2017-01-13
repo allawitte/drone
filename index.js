@@ -22,8 +22,19 @@ app.use(bodyParser.json());
 
 var db = require('./server/modules/db.js');
 
+app.use(morgan('dev'));
 
+// =======================
+// routes ================
+// =======================
+// basic route
 app.use(express.static(__dirname + '/public'));
+app.get('/', function(req, res) {
+    res.render('index.html');
+});
+
+
+
 
 app.use(require('body-parser').urlencoded({extended: true}));
 app.use(bodyParser.json());

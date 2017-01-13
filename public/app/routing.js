@@ -8,7 +8,7 @@
     config.$inject = ['$stateProvider', '$urlRouterProvider'];
 
     function config($stateProvider, $urlRouterProvider) {
-        $urlRouterProvider.otherwise('/view');
+        $urlRouterProvider.otherwise('/');
 
         $stateProvider
             .state('menu', {
@@ -26,7 +26,7 @@
                 id: "order"
             })
             .state('view', {
-                url: '/view',
+                url: '/',
                 controller: 'viewController',
                 templateUrl: 'app/pages/view.html',
                 controllerAs: 'vm',
