@@ -16,7 +16,7 @@
         function getMenu(cb){
             $http.get('/menu')
                 .then(function(data, status){
-                    cb(data);
+                    cb(data.data);
                 });
         }
 

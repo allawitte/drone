@@ -10,7 +10,7 @@
     function menuController(MenuService) {
         var vm = this;
         MenuService.getMenu(function(data){
-            console.log('data',data);
+           vm.menu = data;
         });
        
 
