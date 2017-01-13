@@ -7,10 +7,14 @@ var db = require('./server/modules/db.js');
 
 
 app.use(express.static(__dirname + '/public'));
-//console.log('__dirname', __dirname);
+
 app.use(require('body-parser').urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.set('port', process.env.PORT || '8000');
+
+app.get('/menu', function (req, res) {
+    db.getMenu(req, res)
+});
 
 
 app.listen(app.get('port'), function () {

@@ -5,10 +5,13 @@
         .module('app')
         .controller('menuController', menuController);
 
-    menuController.$inject = [];
+    menuController.$inject = ['MenuService'];
 
-    function menuController() {
+    function menuController(MenuService) {
         var vm = this;
+        MenuService.getMenu(function(data){
+            console.log('data',data);
+        });
        
 
     }

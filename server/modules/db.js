@@ -10,8 +10,10 @@ var menuShema = new Schema({
     rating: {type: Number},
     ingredients: {type: Array},
     price: {type: Number}
-},{collection: 'menu'});
+}, {collection: 'menu'});
+
 var menuList = mongoose.model('menu', menuShema);
+
 var setMenu = function () {
     menu.forEach(item => {
         var data = new menuList(item);
@@ -21,8 +23,20 @@ var setMenu = function () {
     });
 };
 //setMenu();
+var getMenu = function (req, res) {
+    menuList.find(function (err, menu) {
+        if (err) {
+            res.status(403).send(err);
+        }
+        else {
+            //console.log('menu', menu);
+            res.status(200).json(menu);
+        }
+    });
+};
 
 exports.db = db;
+exports.getMenu = getMenu;
 /**
  * Created by HP on 12/19/2016.
  */
