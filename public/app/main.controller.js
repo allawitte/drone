@@ -5,11 +5,15 @@
         .module('app')
         .controller('MainController', MainController);
 
-    MainController.$inject = [];
+    MainController.$inject = ['$scope'];
 
-    function MainController() {
+    function MainController($scope) {
         var vm = this;
-        console.log('Main Controller');
+
+        $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+            $scope.currentNavItem = toState.id;
+        });
+
 
     }
 })();

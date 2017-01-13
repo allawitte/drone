@@ -9,7 +9,7 @@
 
     function orderController() {
         var vm = this;
-        console.log('Order');
+        
     }
 })();
 /**

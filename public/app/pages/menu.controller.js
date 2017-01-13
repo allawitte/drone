@@ -9,7 +9,7 @@
 
     function menuController() {
         var vm = this;
-        console.log('Menu');
+       
 
     }
 })();

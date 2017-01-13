@@ -9,7 +9,7 @@
 
     function viewController() {
         var vm = this;
-        console.log('View');
+        
 
     }
 })();
