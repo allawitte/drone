@@ -15,6 +15,9 @@
   "license": "MIT",
   "homepage": "https://bitbucket.org/netology-university/drone-cafe#readme",
   "dependencies": {
+    "body-parser": "^1.15.2",
+    "jsonwebtoken": "^7.2.1",
+    "morgan": "^1.7.0",
     "netology-fake-drone-api": "^1.0.1"
   },
   "private": true,

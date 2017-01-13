@@ -1,0 +1,12 @@
+<md-content class="md-no-momentum">
+    <md-input-container class="md-block">
+        <!-- Use floating placeholder instead of label -->
+        <ng-md-icon icon="email" style="fill: green" size="30px" class="md-icon email"></ng-md-icon>
+        <input ng-model="user.email" type="email" placeholder="Email (required)" ng-required="true">
+    </md-input-container>
+
+    <md-input-container class="md-block">
+        <ng-md-icon icon="lock" class="md-icon lock" style="fill: green" size="30px"></ng-md-icon>
+        <input ng-model="user.address" type="password" placeholder="Password" >
+    </md-input-container>
+</md-content>

@@ -32,6 +32,20 @@
                 controllerAs: 'vm',
                 id: "view"
             })
+            .state('login', {
+                url: '/login',
+                controller: 'loginController',
+                templateUrl: 'app/pages/login/login.html',
+                controllerAs: 'vm',
+                id: "view"
+            })
+            .state('register', {
+                url: '/register',
+                controller: 'registerController',
+                templateUrl: 'app/pages/register/register.html',
+                controllerAs: 'vm',
+                id: "view"
+            })
 
     }
 })();
