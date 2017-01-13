@@ -1,5 +1,8 @@
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/drone');
+var config = require('../../config');
+console.log('config', config);
+mongoose.connect(config.database); // connect to database
+///mongoose.connect('mongodb://localhost/drone');
 var db = mongoose.connection;
 var Schema = mongoose.Schema;
 const menu = require('./menu');
