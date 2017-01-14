@@ -1,16 +1,40 @@
 <div class="col-md-4 col-md-offset-4">
     <div layout-gt-sm="row">
         <md-content class="md-no-momentum">
-            <md-input-container class="md-block">
-                <!-- Use floating placeholder instead of label -->
-                <ng-md-icon icon="email" style="fill: green" size="30px" class="md-icon email"></ng-md-icon>
-                <input ng-model="user.email" type="email" placeholder="Email" ng-required="true">
-            </md-input-container>
+            <form name="userForm">
+                <md-input-container class="md-block">
+                    <div ng-if="vm.userExists" class="alert alert-danger">Login or password is incorrect</div>
+                    <ng-md-icon icon="email" style="fill: green" size="30px" class="md-icon email"></ng-md-icon>
+                    <input ng-model="vm.user.email"
+                           type="email"
+                           placeholder="Email (required)"
+                           name="email"
+                           ng-required="true" ng-pattern="/.+@.+\..+/i">
+                    <div ng-messages="userForm.email.$error" role="alert" multiple>
+                        <div ng-message="required" class="my-message">You must supply a email address.</div>
+                        <div ng-message="pattern" class="my-message">Input a valid email address</div>
+                    </div>
+                </md-input-container>
 
-            <md-input-container class="md-block">
-                <ng-md-icon icon="lock" class="md-icon lock" style="fill: green" size="30px"></ng-md-icon>
-                <input ng-model="user.address" type="password" placeholder="Password" ng-required="true">
-            </md-input-container>
+                <md-input-container class="md-block">
+                    <ng-md-icon icon="lock" class="md-icon lock" style="fill: green" size="30px"></ng-md-icon>
+                    <input ng-model="vm.user.password"
+                           type="password"
+                           placeholder="Password"
+                           ng-required="true"
+                           name="password"
+                           ng-minlength="6">
+                    <div ng-messages="userForm.password.$error" role="alert" multiple>
+                        <div ng-message="required" class="my-message">You must supply a password</div>
+                        <div ng-message="minlength" class="my-message">Password must be at least 6 simbols</div>
+                    </div>
+                </md-input-container>
+                <md-button class="md-raised md-primary"
+                           ng-click="vm.save(vm.user)"
+                           ng-disabled="vm.isDidabled(userForm.email.$error,userForm.password.$error)">Sign Up</md-button>
+
+
+            </form>
         </md-content>
     </div>
 </div>

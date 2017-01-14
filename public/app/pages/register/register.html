@@ -3,7 +3,7 @@
         <md-content class="md-no-momentum">
             <form name="userForm">
                 <md-input-container class="md-block">
-                    <!-- Use floating placeholder instead of label -->
+                    <div ng-if="vm.userExists" class="alert alert-danger">User already exists</div>
                     <ng-md-icon icon="email" style="fill: green" size="30px" class="md-icon email"></ng-md-icon>
                     <input ng-model="vm.user.email"
                            type="email"
