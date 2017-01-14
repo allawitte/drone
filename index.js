@@ -32,7 +32,13 @@ app.get('/', function (req, res) {
 app.use(require('body-parser').urlencoded({extended: true}));
 app.use(bodyParser.json());
 
+app.use(function(req, res, next) {
 
+    // check header or url parameters or post parameters for token
+    var token = req.body.token || req.query.token || req.headers['x-access-token'];
+    console.log('token', token);
+    next();
+});
 app.get('/menu', function (req, res) {
     db.getMenu(req, res)
 });

@@ -5,16 +5,18 @@
         .module('app')
         .controller('loginController', loginController);
 
-    loginController.$inject = ['userService', '$state'];
+    loginController.$inject = ['userService', '$state', '$localStorage'];
 
-    function loginController(userService, $state) {
+    function loginController(userService, $state, $localStorage) {
         var vm = this;
         vm.login = login;
 
         function login(user){
+            console.log('go to login');
             userService.userAuth(user)
                 .then(function (res) {
-                        console.log(res);
+                        console.log('res.data', res.data);
+                        $localStorage.token = res.data.token;
                         $state.go('view');
                     }
                     , function (err) {
