@@ -11,11 +11,15 @@
         var service = {};
 
         service.userCreate = userCreate;
+        service.userAuth = userAuth;
         return service;
 
         function userCreate(user) {
-            return $http.post('/register', user);
-                
+            return $http.post('/register', user);                
+        }
+        
+        function userAuth(user){           
+            return $http.post('/auth', user);
         }
 
     }

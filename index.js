@@ -43,16 +43,13 @@ app.get('/menu', function (req, res) {
 });
 
 app.post('/register', function (req, res) {
-    console.log('req.body.email', req.body.email);
     var newUser = new User({
         email: req.body.email,
         password: req.body.password,
         cook: false
     });
     User.find({email: req.body.email}, function (err, users) {
-        console.log('users', users);
         if (users.length == 0) {
-            console.log('saving a user');
             newUser.save(
                 function (err) {
                     if (err) throw err;
@@ -66,6 +63,23 @@ app.post('/register', function (req, res) {
             res.status(403).json({message: 'User already exists'});
         }
     })
+});
+
+app.post('/auth', function (req, res) {
+    console.log('req.body.email', req.body.email);
+    console.log('req.body.password', req.body.password);
+    User.find({email: req.body.email, password: req.body.password}, function (err, users) {
+        console.log('users.length', users.length);
+        if (users.length > 0) {
+            console.log('User exists');
+            res.status(200).json({message: 'success'});
+        }
+
+        else {
+            console.log('User do not exists');
+            res.status(404).json({message: 'User do not exists'});
+        }
+    });
 });
 
 
