@@ -5,7 +5,7 @@
                 <md-input-container class="md-block">
                     <!-- Use floating placeholder instead of label -->
                     <ng-md-icon icon="email" style="fill: green" size="30px" class="md-icon email"></ng-md-icon>
-                    <input ng-model="user.email"
+                    <input ng-model="vm.user.email"
                            type="email"
                            placeholder="Email (required)"
                            name="email"
@@ -18,7 +18,7 @@
 
                 <md-input-container class="md-block">
                     <ng-md-icon icon="lock" class="md-icon lock" style="fill: green" size="30px"></ng-md-icon>
-                    <input ng-model="user.address"
+                    <input ng-model="vm.user.password"
                            type="password"
                            placeholder="Password"
                            ng-required="true"
@@ -29,7 +29,9 @@
                         <div ng-message="minlength" class="my-message">Password must be at least 6 simbols</div>
                     </div>
                 </md-input-container>
-                <md-button class="md-raised md-primary">Sign Up</md-button>
+                <md-button class="md-raised md-primary" ng-disabled="vm.isDidabled(userForm.email.$error,userForm.password.$error)">Sign Up</md-button>
+
+
             </form>
         </md-content>
     </div>
