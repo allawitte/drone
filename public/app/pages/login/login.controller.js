@@ -14,6 +14,7 @@
         function login(user){
             userService.userAuth(user)
                 .then(function (res) {
+                        console.log(res);
                         $state.go('view');
                     }
                     , function (err) {

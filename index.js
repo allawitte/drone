@@ -9,9 +9,6 @@ var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 var config = require('./config'); // get our config file
 var User = require('./server/modules/user'); // get our mongoose model
 
-// =======================
-// configuration =========
-// =======================
 app.set('port', process.env.PORT || '8000');
 //mongoose.connect(config.database); // connect to database
 app.set('superSecret', config.secret); // secret variable
@@ -24,11 +21,9 @@ var db = require('./server/modules/db.js');
 
 app.use(morgan('dev'));
 
-// =======================
-// routes ================
-// =======================
-// basic route
 app.use(express.static(__dirname + '/public'));
+var apiRoutes = express.Router();
+console.log('apiRoutes', apiRoutes);
 app.get('/', function (req, res) {
     res.render('index.html');
 });
@@ -67,12 +62,21 @@ app.post('/register', function (req, res) {
 
 app.post('/auth', function (req, res) {
     console.log('req.body.email', req.body.email);
-    console.log('req.body.password', req.body.password);
-    User.find({email: req.body.email, password: req.body.password}, function (err, users) {
-        console.log('users.length', users.length);
-        if (users.length > 0) {
+    User.findOne({email: req.body.email, password: req.body.password}, function (err, user) {
+        console.log('user', user);
+        if (user) {
             console.log('User exists');
-            res.status(200).json({message: 'success'});
+            console.log(app.get('superSecret'));
+            var token = jwt.sign(user, app.get('superSecret'), {
+                expiresIn: 1440 // expires in 24 hours
+            });
+
+            // return the information including token as JSON
+            res.status(200).json({
+                success: true,
+                message: 'success!',
+                token: token
+            });
         }
 
         else {
