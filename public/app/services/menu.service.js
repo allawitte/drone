@@ -4,9 +4,9 @@
     angular
         .module('app')
         .factory('MenuService', MenuService);
-    MenuService.$inject = ['$http'];
+    MenuService.$inject = ['$http', '$localStorage'];
 
-    function MenuService($http) {
+    function MenuService($http, $localStorage) {
 
         var service = {};
 
@@ -14,7 +14,7 @@
         return service;
 
         function getMenu(cb){
-            $http.get('/menu')
+            $http.get('/menu:'+$localStorage.token)
                 .then(function(data, status){
                     cb(data.data);
                 });
