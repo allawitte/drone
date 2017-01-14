@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 var config = require('../../config');
-console.log('config', config);
+
 mongoose.connect(config.database); // connect to database
 ///mongoose.connect('mongodb://localhost/drone');
 var db = mongoose.connection;

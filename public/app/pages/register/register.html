@@ -29,7 +29,9 @@
                         <div ng-message="minlength" class="my-message">Password must be at least 6 simbols</div>
                     </div>
                 </md-input-container>
-                <md-button class="md-raised md-primary" ng-disabled="vm.isDidabled(userForm.email.$error,userForm.password.$error)">Sign Up</md-button>
+                <md-button class="md-raised md-primary"
+                           ng-click="vm.save(vm.user)"
+                           ng-disabled="vm.isDidabled(userForm.email.$error,userForm.password.$error)">Sign Up</md-button>
 
 
             </form>
