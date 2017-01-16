@@ -17,6 +17,7 @@
                 .then(function (res) {
                         console.log('res.data', res.data);
                         $localStorage.token = res.data.token;
+                        $localStorage.user = res.data.user;
                         $state.go('view');
                     }
                     , function (err) {

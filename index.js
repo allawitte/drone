@@ -8,6 +8,7 @@ var mongoose = require('mongoose');
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 var config = require('./config'); // get our config file
 var User = require('./server/modules/user'); // get our mongoose model
+var Order = require('./server/modules/order'); // get our mongoose model
 
 app.set('port', process.env.PORT || '8000');
 //mongoose.connect(config.database); // connect to database
@@ -41,7 +42,8 @@ app.post('/register', function (req, res) {
     var newUser = new User({
         email: req.body.email,
         password: req.body.password,
-        cook: false
+        cook: false,
+        account: 0
     });
     User.find({email: req.body.email}, function (err, users) {
         if (users.length == 0) {
@@ -61,9 +63,7 @@ app.post('/register', function (req, res) {
 });
 
 app.post('/auth', function (req, res) {
-    console.log('req.body.email', req.body.email);
     User.findOne({email: req.body.email, password: req.body.password}, function (err, user) {
-        console.log('user', user);
         if (user) {
             console.log('User exists');
             console.log(app.get('superSecret'));
@@ -74,7 +74,7 @@ app.post('/auth', function (req, res) {
             // return the information including token as JSON
             res.status(200).json({
                 success: true,
-                message: 'success!',
+                user: user._id,
                 token: token
             });
         }
@@ -84,6 +84,56 @@ app.post('/auth', function (req, res) {
             res.status(404).json({message: 'User do not exists'});
         }
     });
+});
+
+app.post('/order', function (req, res) {
+    var newOrder = new Order({
+        userId: req.body.userId,
+        dishId: req.body.dishId,
+        status: 0,
+        time: req.body.time
+    });
+    newOrder.save(function (err) {
+        if (err)throw err;
+
+        console.log('Order saved successfully');
+        res.json({success: true, status: 200});
+    })
+});
+var mongojs = require('mongojs');
+var dbjs = mongojs('drone',['menu', 'orders', 'users']);
+
+app.get('/order/cook', function (req, res) {
+        dbjs.orders.aggregate(
+            {$match: {status: {"$lte": 2}}}
+            , {
+                $lookup: {
+                    from: "menu",
+                    localField: "dishId",
+                    foreignField: "id",
+                    as: "dishes"
+                }
+            }
+            , function (error, result) {
+                if (error) {
+                    console.log(error);
+                }
+                else {
+                    console.log(result);
+                    res.status(200).json(result);
+                }
+            }
+        );
+
+    // Order.find({status: {"$lte": 0}}, function (err, orders) {
+    //     console.log('orders', orders);
+    //     orders.forEach(function(item.id){
+    //         Menu.findOne({id: item.id}, function (err, dish) {
+    //             console.log('dish', dish);
+    //         });
+    //     }
+    //     )
+    // });
 });
 
 

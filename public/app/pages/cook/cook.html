@@ -1,0 +1,22 @@
+<h2>Cook</h2>
+<md-content class="md-padding cook" layout="row" layout-wrap>
+    <md-card ng-repeat="item in vm.dishes" flex="30">
+        <img ng-src="{{item.dish.image}}" class="md-card-image" alt="Washed Out">
+        <md-card-title>
+            <md-card-title-text>
+                <span class="md-headline">{{item.dish.title}}</span>
+            </md-card-title-text>
+        </md-card-title>
+        <md-card-actions layout="row" layout-align="start center">
+            <md-card-icon-actions>
+                <ingredients-list info="item.dish.ingredients"></ingredients-list>
+            </md-card-icon-actions>
+        </md-card-actions>
+        <md-card-content>
+            <p>
+                <md-button>Action 1</md-button>
+                <md-button>Action 2</md-button>
+            </p>
+        </md-card-content>
+    </md-card>
+</md-content>

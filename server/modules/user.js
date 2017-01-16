@@ -5,7 +5,8 @@ var Schema = mongoose.Schema;
 var userSchema = Schema({
     email: String,
     password: String,
-    cook: Boolean
+    cook: Boolean,
+    account: Number
 },{collection: 'users'});
 
 var User = mongoose.model('users', userSchema);

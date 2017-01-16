@@ -14,14 +14,14 @@
             .state('menu', {
                 url: '/menu',
                 controller: 'menuController',
-                templateUrl: 'app/pages/menu.html',
+                templateUrl: 'app/pages/menu/menu.html',
                 controllerAs: 'vm',
                 id: "menu"
             })
             .state('order', {
                 url: '/order',
                 controller: 'orderController',
-                templateUrl: 'app/pages/order.html',
+                templateUrl: 'app/pages/order/order.html',
                 controllerAs: 'vm',
                 id: "order"
             })
@@ -45,6 +45,13 @@
                 templateUrl: 'app/pages/register/register.html',
                 controllerAs: 'vm',
                 id: "view"
+            })
+            .state('cook', {
+                url: '/cook',
+                controller: 'cookController',
+                templateUrl: 'app/pages/cook/cook.html',
+                controllerAs: 'vm',
+                id: "cook"
             })
 
     }

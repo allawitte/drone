@@ -17,6 +17,7 @@
   "dependencies": {
     "body-parser": "^1.15.2",
     "jsonwebtoken": "^7.2.1",
+    "mongojs": "^2.4.0",
     "morgan": "^1.7.0",
     "netology-fake-drone-api": "^1.0.1"
   },
