@@ -5,7 +5,7 @@
         .module('app')
         .component('ingredientsList', {
             bindings: {
-                dynamicitems: '=dynamicitems'
+                dynamicItems: '='
             },
             templateUrl: 'app/pages/cook/ingredients.list.html',
             controller: 'ingredientsListController'

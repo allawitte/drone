@@ -285,7 +285,7 @@
 
     function ingredientsListController($timeout) {
         var vm = this;
-        console.log('this.dynamicitems', this.dynamicitems);
+        console.log('vm.dynamicItems', vm.dynamicItems);
         var DynamicItems = function() {
             /**
              * @type {!Object<?Array>} Data pages, keyed by page number (0-index).
@@ -358,7 +358,7 @@
         .module('app')
         .component('ingredientsList', {
             bindings: {
-                dynamicitems: '=dynamicitems'
+                dynamicItems: '='
             },
             templateUrl: 'app/pages/cook/ingredients.list.html',
             controller: 'ingredientsListController'
