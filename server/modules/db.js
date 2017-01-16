@@ -25,7 +25,7 @@ var setMenu = function () {
         });
     });
 };
-//setMenu();
+setMenu();
 var getMenu = function (req, res) {
     menuList.find(function (err, menu) {
         if (err) {

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="theme.css"/>
+    <link rel="stylesheet" href="style.css"/>
+    <title>Dron Cafe</title>
+</head>
+<body ng-controller="MainController">
+<div class="container-fluid">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" ui-sref="/">
+                    Drone Cafe
+                </a>
+            </div>
+            <ul class="nav navbar-nav navbar-right">
+                <li ng-if="!isLogged"><a ui-sref="login">Login</a></li>
+                <li ng-if="isLogged"><a href="javascript:void(0)" ng-click="logOut()">Log Out</a></li>
+                <li><a ui-sref="register">Register</a></li>
+                <li><a ui-sref="cook">Cook</a></li>
+            </ul>
+        </div>
+    </nav>
+    <md-nav-bar md-selected-nav-item="currentNavItem" nav-bar-aria-label="navigation links">
+        <md-nav-item md-nav-sref="view" name="view" value="view">View</md-nav-item>
+        <md-nav-item md-nav-sref="menu" name="menu" value="menu">Menu</md-nav-item>
+        <md-nav-item md-nav-sref="order" name="order" value="order">Order</md-nav-item>
+    </md-nav-bar>
+    <ui-view></ui-view>
+</div>
+</body>
+<script src='lib.js'></script>
+<script src='app.js'></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular-material-icons/0.7.1/angular-material-icons.min.js"></script>
+</html>

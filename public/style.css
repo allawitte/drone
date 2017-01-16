@@ -1,0 +1,12 @@
+.md-block.md-icon-float {
+  margin-left: 40px;
+  position: relative; }
+  .md-block.md-icon-float .md-icon {
+    position: absolute;
+    left: -10px; }
+
+.cook md-list {
+  width: 100%; }
+  .cook md-list .md-subheader {
+    font-size: 16px;
+    font-weight: bold; }
