@@ -5,9 +5,9 @@
         .module('app')
         .controller('cookController', cookController);
 
-    cookController.$inject = ['orderService'];
+    cookController.$inject = ['orderService', '$scope'];
 
-    function cookController(orderService) {
+    function cookController(orderService, $scope) {
         var vm = this;
         orderService.getOrders()
             .then(function (res) {
