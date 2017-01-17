@@ -1,13 +1,14 @@
-<!--<md-list ng-cloak>-->
-    <!--<md-subheader class="md-no-sticky">Ingredients</md-subheader>-->
-    <!--<md-list-item ng-repeat="ingredient in $ctrl.info track by $index">-->
-        <!--<p> {{ ingredient }} </p>-->
-        <!--<md-checkbox class="md-secondary" ng-model="topping.wanted"></md-checkbox>-->
-    <!--</md-list-item>-->
-<!--</md-list>-->
-<md-virtual-repeat-container id="vertical-container">
-    <div md-virtual-repeat="ingredient in $ctrl.dynamicItems" md-on-demand
-         class="repeated-item" flex>
-        {{ingredient}}
-    </div>
-</md-virtual-repeat-container>
+<md-list ng-cloak>
+    <md-subheader class="md-no-sticky">Ingredients</md-subheader>
+    <md-list-item ng-repeat="ingredient in $ctrl.ingredients track by $index">
+        <p> {{ ingredient }} </p>
+        <md-checkbox class="md-secondary" ng-model="topping.wanted"></md-checkbox>
+    </md-list-item>
+</md-list>
+
+<!--<md-virtual-repeat-container id="vertical-container">-->
+    <!--<div md-virtual-repeat="ingredient in $ctrl.dynamicItems" md-on-demand-->
+         <!--class="repeated-item" flex>-->
+        <!--{{ingredient}}-->
+    <!--</div>-->
+<!--</md-virtual-repeat-container>-->
