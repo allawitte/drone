@@ -14,10 +14,13 @@
             </md-card-icon-actions>
         </md-card-actions>
         <md-card-content>
-            <p>
-                <md-button>Action 1</md-button>
-                <md-button>Action 2</md-button>
-            </p>
+            <md-radio-group ng-model="item.status" ng-change="vm.changeStatuse(item)">
+
+                <md-radio-button value="0" class="md-primary">Ordered</md-radio-button>
+                <md-radio-button value="1"> In Progress </md-radio-button>
+                <md-radio-button value="2">To Delivery</md-radio-button>
+
+            </md-radio-group>
         </md-card-content>
     </md-card>
 </md-content>

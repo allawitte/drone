@@ -4,3 +4,5 @@ drone
   .deliver()
   .then(() => console.log('Доставлено'))
   .catch(() => console.log('Возникли сложности'));
+
+module.exports = drone;

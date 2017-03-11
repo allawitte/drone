@@ -4,6 +4,9 @@ var app = express();
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var mongoose = require('mongoose');
+mongoose.Promise = require('bluebird');
+const drone = require('netology-fake-drone-api');
+
 
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 var config = require('./config'); // get our config file
@@ -23,8 +26,7 @@ var db = require('./server/modules/db.js');
 app.use(morgan('dev'));
 
 app.use(express.static(__dirname + '/public'));
-var apiRoutes = express.Router();
-console.log('apiRoutes', apiRoutes);
+
 app.get('/', function (req, res) {
     res.render('index.html');
 });
@@ -32,6 +34,11 @@ app.get('/', function (req, res) {
 
 app.use(require('body-parser').urlencoded({extended: true}));
 app.use(bodyParser.json());
+
+// app.use('/order/*', function(req, res, next){
+//     console.log('order', req.params);
+//     next();
+// });
 
 
 app.get('/menu', function (req, res) {
@@ -95,35 +102,112 @@ app.post('/order', function (req, res) {
     });
     newOrder.save(function (err) {
         if (err)throw err;
-
         console.log('Order saved successfully');
         res.json({success: true, status: 200});
     })
 });
-var mongojs = require('mongojs');
-var dbjs = mongojs('drone',['menu', 'orders', 'users']);
 
-app.get('/order/cook', function (req, res) {
-        dbjs.orders.aggregate(
-            {$match: {status: {"$lte": 2}}}
-            , {
-                $lookup: {
-                    from: "menu",
-                    localField: "dishId",
-                    foreignField: "id",
-                    as: "dishes"
-                }
-            }
-            , function (error, result) {
-                if (error) {
-                    console.log(error);
+app.put('/order/change-status', function (req, res) {
+    console.log('req', req.body);
+    var id = req.body._id;
+    var status = req.body.status;
+
+    Order.findOne({_id: id}, function (err, foundOrder) {
+        if (err) {
+            res.status(500).send();
+        }
+        else {
+            foundOrder.status = status;
+            foundOrder.save(function (err, updatedObject) {
+                if (err) {
+                    res.status(500).send();
                 }
                 else {
-                    console.log(result);
-                    res.status(200).json(result);
+                    if (status == 2) {
+                        drone
+                            .deliver()
+                            .then(() => {
+                                console.log('Доставлено');
+                                updatedObject.status = 3;
+                                updatedObject.save(function (err, savedObject) {
+                                    if (err) {
+                                        console.log('err', err)
+                                    }
+                                    else {
+                                        console.log('savedObject', savedObject);
+                                    }
+                                });
+                            })
+                            .catch(() => {
+                                console.log('Возникли сложности');
+                                updatedObject.status = 4;
+                                updatedObject.save(function (err, savedObject) {
+                                    if (err) {
+                                        console.log('err', err)
+                                    }
+                                    else {
+                                        console.log('savedObject', savedObject);
+                                    }
+                                });
+                            });
+                    }
+                    res.json({data: updatedObject, status: 200});
                 }
+            })
+        }
+        console.log('updated', foundOrder);
+    });
+
+});
+var mongojs = require('mongojs');
+var dbjs = mongojs('drone', ['menu', 'orders', 'users']);
+
+app.get('/order/:clientId', function (req, res) {
+    var clientId = req.params.clientId;
+    console.log('clientId', clientId);
+    dbjs.orders.aggregate(
+        {$match: {userId: clientId}}
+        , {
+            $lookup: {
+                from: "menu",
+                localField: "dishId",
+                foreignField: "id",
+                as: "dishes"
             }
-        );
+        }
+        , function (error, result) {
+            if (error) {
+                console.log(error);
+            }
+            else {
+                console.log(result);
+                res.status(200).json(result);
+            }
+        }
+    )
+});
+
+app.get('/order/cook', function (req, res) {
+    dbjs.orders.aggregate(
+        {$match: {status: {"$lte": 2}}}
+        , {
+            $lookup: {
+                from: "menu",
+                localField: "dishId",
+                foreignField: "id",
+                as: "dishes"
+            }
+        }
+        , function (error, result) {
+            if (error) {
+                console.log(error);
+            }
+            else {
+                //console.log(result);
+                res.status(200).json(result);
+            }
+        }
+    );
 
     // Order.find({status: {"$lte": 0}}, function (err, orders) {
     //     console.log('orders', orders);

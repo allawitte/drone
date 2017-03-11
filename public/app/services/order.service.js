@@ -12,14 +12,26 @@
 
         service.placeOrder = placeOrder;
         service.getOrders = getOrders;
+        service.getOrdersForClient = getOrdersForClient;
+        service.changeOrderStatus = changeOrderStatus;
+        
+        function getOrdersForClient(clientId){
+            return $http.get('order/' + clientId);
+        }
 
-        function placeOrder(data){
+
+        function placeOrder(data) {
             return $http.post('/order', data);
         }
 
-        function getOrders(){
+        function getOrders() {
             return $http.get('/order/cook');
         }
+
+        function changeOrderStatus(data) {
+            return $http.put('/order/change-status', data);
+        }
+
         return service;
 
     }

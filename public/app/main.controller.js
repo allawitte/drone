@@ -5,11 +5,15 @@
         .module('app')
         .controller('MainController', MainController);
 
-    MainController.$inject = ['$scope', 'authService'];
+    MainController.$inject = ['$scope', 'authService', '$localStorage'];
 
-    function MainController($scope, authService) {
+    function MainController($scope, authService, $localStorage) {
         var vm = this;
         $scope.logOut = logOut;
+
+        vm.userId = $localStorage.user;
+
+        console.log('vm.userId', vm.userId);
 
         $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
             $scope.currentNavItem = toState.id;

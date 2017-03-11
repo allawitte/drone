@@ -15,11 +15,15 @@
         .module('app')
         .controller('MainController', MainController);
 
-    MainController.$inject = ['$scope', 'authService'];
+    MainController.$inject = ['$scope', 'authService', '$localStorage'];
 
-    function MainController($scope, authService) {
+    function MainController($scope, authService, $localStorage) {
         var vm = this;
         $scope.logOut = logOut;
+
+        vm.userId = $localStorage.user;
+
+        console.log('vm.userId', vm.userId);
 
         $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
             $scope.currentNavItem = toState.id;
@@ -108,25 +112,6 @@
 
     angular
         .module('app')
-        .controller('viewController', viewController);
-
-    viewController.$inject = [];
-
-    function viewController() {
-        var vm = this;
-        
-
-    }
-})();
-/**
- * Created by HP on 1/12/2017.
- */
-
-(function () {
-    'use strict';
-
-    angular
-        .module('app')
         .factory('authService', authService);
     authService.$inject = ['$localStorage'];
 
@@ -195,14 +180,26 @@
 
         service.placeOrder = placeOrder;
         service.getOrders = getOrders;
+        service.getOrdersForClient = getOrdersForClient;
+        service.changeOrderStatus = changeOrderStatus;
+        
+        function getOrdersForClient(clientId){
+            return $http.get('order/' + clientId);
+        }
 
-        function placeOrder(data){
+
+        function placeOrder(data) {
             return $http.post('/order', data);
         }
 
-        function getOrders(){
+        function getOrders() {
             return $http.get('/order/cook');
         }
+
+        function changeOrderStatus(data) {
+            return $http.put('/order/change-status', data);
+        }
+
         return service;
 
     }
@@ -246,125 +243,18 @@
 
     angular
         .module('app')
-        .controller('cookController', cookController);
+        .controller('viewController', viewController);
 
-    cookController.$inject = ['orderService', '$scope'];
+    viewController.$inject = [];
 
-    function cookController(orderService, $scope) {
+    function viewController() {
         var vm = this;
-        orderService.getOrders()
-            .then(function (res) {
-                console.log('res.data', res.data);
-                    vm.dishes = res.data.map(function(item){
-                        return {_id: item._id,
-                            status: item.status,
-                            dish: item.dishes[0]
-                        }
-                    });
-
-                    console.log(vm.dishes);
-                }
-                , function (err) {
-                    console.log(err);
-                });
+        
 
     }
 })();
 /**
- * Created by HP on 1/14/2017.
- */
-
-(function () {
-    'use strict';
-
-    angular
-        .module('app')
-        .controller('ingredientsListController', ingredientsListController);
-
-    ingredientsListController.$inject = ['$timeout'];
-
-    function ingredientsListController($timeout) {
-        var vm = this;
-        // console.log('vm.dynamicItems', vm.dynamicItems);
-        // var DynamicItems = function() {
-        //     /**
-        //      * @type {!Object<?Array>} Data pages, keyed by page number (0-index).
-        //      */
-        //     this.loadedPages = {};
-        //
-        //     /** @type {number} Total number of items. */
-        //     this.numItems = 0;
-        //
-        //     /** @const {number} Number of items to fetch per request. */
-        //     this.PAGE_SIZE = 50;
-        //
-        //     this.fetchNumItems_();
-        // };
-        //
-        // // Required.
-        // DynamicItems.prototype.getItemAtIndex = function(index) {
-        //     var pageNumber = Math.floor(index / this.PAGE_SIZE);
-        //     var page = this.loadedPages[pageNumber];
-        //
-        //     if (page) {
-        //         return page[index % this.PAGE_SIZE];
-        //     } else if (page !== null) {
-        //         this.fetchPage_(pageNumber);
-        //     }
-        // };
-        //
-        // // Required.
-        // DynamicItems.prototype.getLength = function() {
-        //     return this.numItems;
-        // };
-        //
-        // DynamicItems.prototype.fetchPage_ = function(pageNumber) {
-        //     // Set the page to null so we know it is already being fetched.
-        //     this.loadedPages[pageNumber] = null;
-        //
-        //     // For demo purposes, we simulate loading more items with a timed
-        //     // promise. In real code, this function would likely contain an
-        //     // $http request.
-        //     $timeout(angular.noop, 300).then(angular.bind(this, function() {
-        //         this.loadedPages[pageNumber] = [];
-        //         var pageOffset = pageNumber * this.PAGE_SIZE;
-        //         for (var i = pageOffset; i < pageOffset + this.PAGE_SIZE; i++) {
-        //             this.loadedPages[pageNumber].push(i);
-        //         }
-        //     }));
-        // };
-        //
-        // DynamicItems.prototype.fetchNumItems_ = function() {
-        //     // For demo purposes, we simulate loading the item count with a timed
-        //     // promise. In real code, this function would likely contain an
-        //     // $http request.
-        //     $timeout(angular.noop, 300).then(angular.bind(this, function() {
-        //         this.numItems = 50000;
-        //     }));
-        // };
-        //
-        // this.dynamicItems = new DynamicItems();
-
-    }
-})();
-/**
- * Created by HP on 1/16/2017.
- */
-
-(function () {
-    'use strict';
-
-    angular
-        .module('app')
-        .component('ingredientsList', {
-            bindings: {
-                dynamicItems: '=dynamicItems'
-            },
-            templateUrl: 'app/pages/cook/ingredients.list.html',
-            controller: 'ingredientsListController'
-        });
-})();
-/* Created by HP on 1/16/2017.
+ * Created by HP on 1/12/2017.
  */
 
 (function () {
@@ -399,6 +289,93 @@
 })();
 /**
  * Created by HP on 1/13/2017.
+ */
+
+(function () {
+    'use strict';
+
+    angular
+        .module('app')
+        .controller('cookController', cookController);
+
+    cookController.$inject = ['orderService', '$scope'];
+
+    function cookController(orderService, $scope) {
+        var vm = this;
+        vm.changeStatuse = changeStatuse;
+
+        function changeStatuse(item) {
+            console.log('item', item);
+            orderService.changeOrderStatus(item)
+                .then(function (res) {
+                        console.log(res)
+                    },
+                    function (err) {
+                        console.log(err);
+                    });
+        }
+
+        orderService.getOrders()
+            .then(function (res) {
+                    console.log('res.data', res.data);
+                    vm.dishes = res.data.map(function (item) {
+                        return {
+                            _id: item._id,
+                            status: item.status,
+                            dish: item.dishes[0],
+                            userId: item.userId,
+                            dishId: item.dishId
+                        }
+                    });
+
+                    console.log(vm.dishes);
+                }
+                , function (err) {
+                    console.log(err);
+                });
+
+
+
+    }
+})();
+
+
+/**
+ * Created by HP on 1/14/2017.
+ */
+
+(function () {
+    'use strict';
+
+    angular
+        .module('app')
+        .controller('ingredientsListController', ingredientsListController);
+
+    ingredientsListController.$inject = ['$timeout'];
+
+    function ingredientsListController($timeout) {
+        var vm = this;       
+
+    }
+})();
+/**
+ * Created by HP on 1/16/2017.
+ */
+
+(function () {
+    'use strict';
+
+    angular
+        .module('app')
+        .component('ingredientsList', {
+            bindings: {
+                ingredients: '=ingredients'
+            },
+            templateUrl: 'app/pages/cook/ingredients.list.html',
+            controller: 'ingredientsListController'
+        });
+})();
+/* Created by HP on 1/16/2017.
  */
 
 (function () {
@@ -446,11 +423,28 @@
         .module('app')
         .controller('orderController', orderController);
 
-    orderController.$inject = [];
+    orderController.$inject = ['$localStorage', 'orderService'];
 
-    function orderController() {
+    function orderController($localStorage, orderService) {
         var vm = this;
-        
+        vm.user = $localStorage.user;
+        orderService.getOrdersForClient(vm.user)
+            .then(function (data) {
+
+                    vm.dishes = data.data.map(function (item) {
+                        return {
+                            _id: item._id,
+                            status: item.status,
+                            dish: item.dishes[0],
+                            userId: item.userId,
+                            dishId: item.dishId
+                        }
+                    });
+                    console.log('vm.dishes', vm.dishes);
+                }
+                , function (err) {
+                    console.log('err', err);
+                });
     }
 })();
 /**
