@@ -112,6 +112,25 @@
 
     angular
         .module('app')
+        .controller('viewController', viewController);
+
+    viewController.$inject = [];
+
+    function viewController() {
+        var vm = this;
+        
+
+    }
+})();
+/**
+ * Created by HP on 1/12/2017.
+ */
+
+(function () {
+    'use strict';
+
+    angular
+        .module('app')
         .factory('authService', authService);
     authService.$inject = ['$localStorage'];
 
@@ -243,59 +262,6 @@
 
     angular
         .module('app')
-        .controller('viewController', viewController);
-
-    viewController.$inject = [];
-
-    function viewController() {
-        var vm = this;
-        
-
-    }
-})();
-/**
- * Created by HP on 1/12/2017.
- */
-
-(function () {
-    'use strict';
-
-    angular
-        .module('app')
-        .controller('loginController', loginController);
-
-    loginController.$inject = ['userService', '$state', '$localStorage'];
-
-    function loginController(userService, $state, $localStorage) {
-        var vm = this;
-        vm.login = login;
-
-        function login(user){
-            console.log('go to login');
-            userService.userAuth(user)
-                .then(function (res) {
-                        console.log('res.data', res.data);
-                        $localStorage.token = res.data.token;
-                        $localStorage.user = res.data.user;
-                        $state.go('view');
-                    }
-                    , function (err) {
-                        console.log(err.message);
-                        vm.userExists = true;
-                    });
-        }
-
-    }
-})();
-/**
- * Created by HP on 1/13/2017.
- */
-
-(function () {
-    'use strict';
-
-    angular
-        .module('app')
         .controller('cookController', cookController);
 
     cookController.$inject = ['orderService', '$scope'];
@@ -376,6 +342,40 @@
         });
 })();
 /* Created by HP on 1/16/2017.
+ */
+
+(function () {
+    'use strict';
+
+    angular
+        .module('app')
+        .controller('loginController', loginController);
+
+    loginController.$inject = ['userService', '$state', '$localStorage'];
+
+    function loginController(userService, $state, $localStorage) {
+        var vm = this;
+        vm.login = login;
+
+        function login(user){
+            console.log('go to login');
+            userService.userAuth(user)
+                .then(function (res) {
+                        console.log('res.data', res.data);
+                        $localStorage.token = res.data.token;
+                        $localStorage.user = res.data.user;
+                        $state.go('view');
+                    }
+                    , function (err) {
+                        console.log(err.message);
+                        vm.userExists = true;
+                    });
+        }
+
+    }
+})();
+/**
+ * Created by HP on 1/13/2017.
  */
 
 (function () {
