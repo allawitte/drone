@@ -114,11 +114,30 @@
         .module('app')
         .controller('viewController', viewController);
 
-    viewController.$inject = [];
+    viewController.$inject = ['userService', '$localStorage'];
 
-    function viewController() {
+    function viewController(userService, $localStorage) {
         var vm = this;
-        
+        vm.topUp = topUp;
+        vm.user = $localStorage.user;
+        userService.getUser(vm.user)
+            .then(function (data) {
+                    vm.userData = data.data[0];
+                }
+                , function (err) {
+                    console.log(err);
+                });
+
+        function topUp() {
+            userService.topUp(vm.user, {account: 100})
+                .then(function (data) {
+                        console.log(data)
+                    }
+                    , function (err) {
+                        console.log(err);
+                    });
+        }
+
 
     }
 })();
@@ -241,14 +260,58 @@
 
         service.userCreate = userCreate;
         service.userAuth = userAuth;
+        service.getUser = getUser;
+        service.topUp = topUp;
         return service;
 
-        function userCreate(user) {
-            return $http.post('/register', user);                
+        function topUp(user, data) {
+            return $http.put('/user/topup/' + user, data);
         }
-        
-        function userAuth(user){           
+
+        function userCreate(user) {
+            return $http.post('/register', user);
+        }
+
+        function userAuth(user) {
             return $http.post('/auth', user);
+        }
+
+        function getUser(user) {
+            return $http.get('/user/' + user);
+        }
+
+    }
+})();
+/**
+ * Created by HP on 1/13/2017.
+ */
+
+(function () {
+    'use strict';
+
+    angular
+        .module('app')
+        .controller('loginController', loginController);
+
+    loginController.$inject = ['userService', '$state', '$localStorage'];
+
+    function loginController(userService, $state, $localStorage) {
+        var vm = this;
+        vm.login = login;
+
+        function login(user){
+            console.log('go to login');
+            userService.userAuth(user)
+                .then(function (res) {
+                        console.log('res.data', res.data);
+                        $localStorage.token = res.data.token;
+                        $localStorage.user = res.data.user;
+                        $state.go('view');
+                    }
+                    , function (err) {
+                        console.log(err.message);
+                        vm.userExists = true;
+                    });
         }
 
     }
@@ -349,40 +412,6 @@
 
     angular
         .module('app')
-        .controller('loginController', loginController);
-
-    loginController.$inject = ['userService', '$state', '$localStorage'];
-
-    function loginController(userService, $state, $localStorage) {
-        var vm = this;
-        vm.login = login;
-
-        function login(user){
-            console.log('go to login');
-            userService.userAuth(user)
-                .then(function (res) {
-                        console.log('res.data', res.data);
-                        $localStorage.token = res.data.token;
-                        $localStorage.user = res.data.user;
-                        $state.go('view');
-                    }
-                    , function (err) {
-                        console.log(err.message);
-                        vm.userExists = true;
-                    });
-        }
-
-    }
-})();
-/**
- * Created by HP on 1/13/2017.
- */
-
-(function () {
-    'use strict';
-
-    angular
-        .module('app')
         .controller('menuController', menuController);
 
     menuController.$inject = ['MenuService', '$localStorage', 'orderService'];
@@ -428,6 +457,7 @@
     function orderController($localStorage, orderService) {
         var vm = this;
         vm.user = $localStorage.user;
+        vm.status = ['Ordered', 'In Progress', 'To Delivery', 'Delivered', 'Problems to Deliver'];
         orderService.getOrdersForClient(vm.user)
             .then(function (data) {
 
@@ -470,6 +500,7 @@
         }
 
         function save(user) {
+            user.account = 0;
             userService.userCreate(user)
                 .then(function (result) {
                         console.log('success', result);

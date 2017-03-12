@@ -7,20 +7,21 @@
                 <span class="md-headline">{{item.dish.title}}</span>
             </md-card-title-text>
         </md-card-title>
+        <md-card-title class="small-title">
+            <md-card-title-text>
+                <span class="md-headline">Ingredients List</span>
+            </md-card-title-text>
+        </md-card-title>
         <md-card-actions layout="row" layout-align="start center">
+
             <md-card-icon-actions class="list-inline">
-                <span  ng-repeat="ingredient in item.dish.ingredients track by $index">
+                <span ng-repeat="ingredient in item.dish.ingredients track by $index">
                     <span ng-if="$index > 0">,&nbsp;</span>{{ingredient}}</span>
             </md-card-icon-actions>
         </md-card-actions>
         <md-card-content>
-            <md-radio-group ng-model="item.status">
-
-                <md-radio-button value="0" class="md-primary">Ordered</md-radio-button>
-                <md-radio-button value="1"> In Progress </md-radio-button>
-                <md-radio-button value="2">To Delivery</md-radio-button>
-
-            </md-radio-group>
+            <div class="md-headline">Order Status</div>
+            <div>{{vm.status[item.status]}}</div>
         </md-card-content>
     </md-card>
 </md-content>

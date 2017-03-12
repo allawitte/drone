@@ -17,6 +17,7 @@
         }
 
         function save(user) {
+            user.account = 0;
             userService.userCreate(user)
                 .then(function (result) {
                         console.log('success', result);

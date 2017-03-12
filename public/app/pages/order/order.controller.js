@@ -10,6 +10,7 @@
     function orderController($localStorage, orderService) {
         var vm = this;
         vm.user = $localStorage.user;
+        vm.status = ['Ordered', 'In Progress', 'To Delivery', 'Delivered', 'Problems to Deliver'];
         orderService.getOrdersForClient(vm.user)
             .then(function (data) {
 

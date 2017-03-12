@@ -69,6 +69,29 @@ app.post('/register', function (req, res) {
     })
 });
 
+app.get('/user/:clientId', function(req, res){
+    var clientId = req.params.clientId;
+    console.log('clientId', clientId);
+    var mongooseId = new mongoose.mongo.ObjectId(clientId);
+    User.find({_id: mongooseId}, function (err, users) {
+        res.json(users);
+    })
+});
+
+app.put('/user/topup/:clientId', function(req, res){
+    var clientId = req.params.clientId;
+    var mongooseId = new mongoose.mongo.ObjectId(clientId);
+    User.findOneAndUpdate({_id: mongooseId}, {$set: {account: req.body.account}}, function (err, user) {
+        if(!err){
+            res.json(user);
+        }
+        else{
+            res.json(err);
+        }
+    });
+
+});
+
 app.post('/auth', function (req, res) {
     User.findOne({email: req.body.email, password: req.body.password}, function (err, user) {
         if (user) {

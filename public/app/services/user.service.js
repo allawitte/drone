@@ -12,14 +12,24 @@
 
         service.userCreate = userCreate;
         service.userAuth = userAuth;
+        service.getUser = getUser;
+        service.topUp = topUp;
         return service;
 
-        function userCreate(user) {
-            return $http.post('/register', user);                
+        function topUp(user, data) {
+            return $http.put('/user/topup/' + user, data);
         }
-        
-        function userAuth(user){           
+
+        function userCreate(user) {
+            return $http.post('/register', user);
+        }
+
+        function userAuth(user) {
             return $http.post('/auth', user);
+        }
+
+        function getUser(user) {
+            return $http.get('/user/' + user);
         }
 
     }
