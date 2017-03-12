@@ -71,7 +71,6 @@ app.post('/register', function (req, res) {
 
 app.get('/user/:clientId', function(req, res){
     var clientId = req.params.clientId;
-    console.log('clientId', clientId);
     var mongooseId = new mongoose.mongo.ObjectId(clientId);
     User.find({_id: mongooseId}, function (err, users) {
         res.json(users);
@@ -81,7 +80,7 @@ app.get('/user/:clientId', function(req, res){
 app.put('/user/topup/:clientId', function(req, res){
     var clientId = req.params.clientId;
     var mongooseId = new mongoose.mongo.ObjectId(clientId);
-    User.findOneAndUpdate({_id: mongooseId}, {$set: {account: req.body.account}}, function (err, user) {
+    User.findOneAndUpdate({_id: mongooseId}, {$inc: {account: req.body.account}}, {new: true}, function (err, user) {
         if(!err){
             res.json(user);
         }
@@ -121,7 +120,11 @@ app.post('/order', function (req, res) {
         userId: req.body.userId,
         dishId: req.body.dishId,
         status: 0,
-        time: req.body.time
+        time: [req.body.time]
+    });
+    var mongooseId = new mongoose.mongo.ObjectId(req.body.userId);
+    User.findOne({_id: mongooseId}, function (err, user) {
+        console.log('Users account is', user.account);
     });
     newOrder.save(function (err) {
         if (err)throw err;

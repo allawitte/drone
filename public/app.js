@@ -131,7 +131,7 @@
         function topUp() {
             userService.topUp(vm.user, {account: 100})
                 .then(function (data) {
-                        console.log(data)
+                        vm.userData = data.data;
                     }
                     , function (err) {
                         console.log(err);
