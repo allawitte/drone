@@ -31,6 +31,8 @@
     "angular-material": "^1.1.1",
     "bootstrap": "^3.3.7",
     "ngstorage": "^0.3.11",
-    "moment": "^2.17.1"
+    "moment": "^2.17.1",
+    "angular-socket-io": "^0.7.0",
+    "socket.io-client": "^1.7.2"
   }
 }

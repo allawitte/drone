@@ -4,6 +4,8 @@ var app = express();
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var mongoose = require('mongoose');
+var io = require('socket.io');
+var  http = require('http');
 mongoose.Promise = require('bluebird');
 const drone = require('netology-fake-drone-api');
 
@@ -13,7 +15,7 @@ var config = require('./config'); // get our config file
 var User = require('./server/modules/user'); // get our mongoose model
 var Order = require('./server/modules/order'); // get our mongoose model
 
-app.set('port', process.env.PORT || '8880');
+app.set('port', process.env.PORT || '8000');
 //mongoose.connect(config.database); // connect to database
 app.set('superSecret', config.secret); // secret variable
 
@@ -269,6 +271,20 @@ app.get('/cook/order', function (req, res) {
     // });
 });
 
+
+
+var server = http.createServer();
+
+io = io.listen(server);
+io.sockets.on('connection', function (socket) {
+    socket.emit('news', { hello: 'world' });
+    socket.on('my other event', function (data) {
+        console.log(data);
+    });
+    socket.on('disconnect', function () {
+        console.log('user disconnected');
+    });
+});
 
 app.listen(app.get('port'), function () {
     console.log('Express started on port http://localhost:' + app.get('port'));

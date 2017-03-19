@@ -13,6 +13,8 @@ var lib = [
     'bower_components/angular-animate/angular-animate.js',
     'bower_components/angular-messages/angular-messages.js',
     'bower_components/angular-material/angular-material.js',
+    'bower_components/socket.io-client/dist/socket.io.js',
+    'bower_components/angular-socket-io/socket.js',
     'bower_components/moment/moment.js'
 ];
 
@@ -66,6 +68,15 @@ gulp.task('webserver', function() {
             directoryListing: false,
             open: true
         }));
+});
+
+gulp.task('default', function (callback) {
+    runSequence(
+        'js',
+        'PP',
+        'watch',
+        'webserver',
+        callback);
 });
 
 /**
