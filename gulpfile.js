@@ -1,6 +1,7 @@
 var gulp = require('gulp');
 var webserver = require('gulp-webserver');
 var concat = require('gulp-concat');
+var runSequence = require('run-sequence');
 var sass = require('gulp-sass');
 var watch = require('gulp-watch');
 
@@ -73,7 +74,7 @@ gulp.task('webserver', function() {
 gulp.task('default', function (callback) {
     runSequence(
         'js',
-        'PP',
+        'app',
         'watch',
         'webserver',
         callback);

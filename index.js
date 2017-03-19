@@ -4,8 +4,8 @@ var app = express();
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var mongoose = require('mongoose');
-var io = require('socket.io');
-var  http = require('http');
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 mongoose.Promise = require('bluebird');
 const drone = require('netology-fake-drone-api');
 
@@ -28,7 +28,8 @@ var menuList = require('./server/modules/menulist');
 
 app.use(morgan('dev'));
 
-app.use(express.static(__dirname + '/public'));
+//app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname));
 
 app.get('/', function (req, res) {
     res.render('index.html');
@@ -273,13 +274,13 @@ app.get('/cook/order', function (req, res) {
 
 
 
-var server = http.createServer();
-
-io = io.listen(server);
+// var server = http.createServer();
+//
+// io = io.listen(server);
 io.sockets.on('connection', function (socket) {
     socket.emit('news', { hello: 'world' });
     socket.on('my other event', function (data) {
-        console.log(data);
+        console.log('socket.io data', data);
     });
     socket.on('disconnect', function () {
         console.log('user disconnected');
