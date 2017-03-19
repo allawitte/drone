@@ -71,14 +71,7 @@ gulp.task('webserver', function() {
         }));
 });
 
-gulp.task('default', function (callback) {
-    runSequence(
-        'js',
-        'app',
-        'watch',
-        'webserver',
-        callback);
-});
+gulp.task('default', ['js','app','watch']);
 
 /**
  * Created by HP on 12/19/2016.
