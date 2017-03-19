@@ -1,0 +1,21 @@
+<md-dialog aria-label="Mango (Fruit)">
+    <form ng-cloak>
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <span flex></span>
+                <md-button class="md-icon-button" ng-click="cancel()" aria-label="">
+                    <ng-md-icon class="md-icon" icon="close" size="24"></ng-md-icon>
+                </md-button>
+            </div>
+        </md-toolbar>
+        <md-dialog-content>
+            <div class="md-dialog-content">
+                <p ng-if="success()">The dish was ordered successfully</p>
+                <div layout="column" ng-if="failed()">You have not enough money on account. Please top up!
+                    <div layout="column"><md-button class="md-raised md-warn" ng-click="goToAccount()">Top Up Account</md-button></div>
+                </div>
+            </div>
+        </md-dialog-content>
+    </form>
+</md-dialog>
+Open a dialog over the

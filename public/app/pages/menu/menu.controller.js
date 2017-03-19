@@ -5,30 +5,66 @@
         .module('app')
         .controller('menuController', menuController);
 
-    menuController.$inject = ['MenuService', '$localStorage', 'orderService'];
+    menuController.$inject = ['MenuService', '$localStorage', 'orderService', '$scope', '$mdDialog', '$rootScope'];
 
-    function menuController(MenuService, $localStorage, orderService) {
+    function menuController(MenuService, $localStorage, orderService, $scope, $mdDialog, $rootScope) {
         var vm = this;
         vm.makeOrder = makeOrder;
         MenuService.getMenu(function (data) {
             vm.menu = data;
         });
 
-        function makeOrder(dishId) {
-            console.log(vm.menu);
+        function makeOrder(dishId, ev) {
             orderService.placeOrder({
                 userId: $localStorage.user,
                 dishId: dishId,
                 time: new Date()
             })
                 .then(function (res) {
-                        console.log(res)
+                        if(res.status == 200){
+                            $rootScope.success = true;
+                            allert(ev);
+                        }
                     }
                     , function (err) {
-                        console.log(err);
+                        $rootScope.success = false;
+                        allert(ev);
                     });
         }
+        $scope.customFullscreen = false;
 
+        function DialogController($scope, $mdDialog, $state) {
+            $scope.success = function () {
+                return $rootScope.success;
+            };
+            $scope.failed = function(){
+                return !$rootScope.success;
+            };
+
+            $scope.goToAccount = function(){
+                $scope.cancel();
+                $state.go('view');
+            }
+
+            $scope.cancel = function () {
+                $mdDialog.cancel();
+            };
+        }
+        function allert(ev) {
+            $mdDialog.show({
+                controller: DialogController,
+                templateUrl: '/app/pages/menu/dialog1.tmpl.html',
+                parent: angular.element(document.body),
+                targetEvent: ev,
+                clickOutsideToClose:true,
+                fullscreen: $scope.customFullscreen // Only for -xs, -sm breakpoints.
+            })
+                .then(function(answer) {
+                    $scope.status = 'You said the information was "' + answer + '".';
+                }, function() {
+                    $scope.status = 'You cancelled the dialog.';
+                });
+        };
 
     }
 })();

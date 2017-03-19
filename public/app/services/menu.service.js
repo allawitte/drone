@@ -17,7 +17,7 @@
             if(!authService.checkAuth()) {
                 $state.go('login');
             }
-            $http.get('/menu')
+            $http.get('/menu/')
                 .then(function(data, status){
                     cb(data.data);
                 });

@@ -193,7 +193,7 @@
             if(!authService.checkAuth()) {
                 $state.go('login');
             }
-            $http.get('/menu')
+            $http.get('/menu/')
                 .then(function(data, status){
                     cb(data.data);
                 });
@@ -227,11 +227,11 @@
 
 
         function placeOrder(data) {
-            return $http.post('/order', data);
+            return $http.post('/order/', data);
         }
 
         function getOrders() {
-            return $http.get('/order/cook');
+            return $http.get('/cook/order');
         }
 
         function changeOrderStatus(data) {
@@ -278,40 +278,6 @@
 
         function getUser(user) {
             return $http.get('/user/' + user);
-        }
-
-    }
-})();
-/**
- * Created by HP on 1/13/2017.
- */
-
-(function () {
-    'use strict';
-
-    angular
-        .module('app')
-        .controller('loginController', loginController);
-
-    loginController.$inject = ['userService', '$state', '$localStorage'];
-
-    function loginController(userService, $state, $localStorage) {
-        var vm = this;
-        vm.login = login;
-
-        function login(user){
-            console.log('go to login');
-            userService.userAuth(user)
-                .then(function (res) {
-                        console.log('res.data', res.data);
-                        $localStorage.token = res.data.token;
-                        $localStorage.user = res.data.user;
-                        $state.go('view');
-                    }
-                    , function (err) {
-                        console.log(err.message);
-                        vm.userExists = true;
-                    });
         }
 
     }
@@ -412,32 +378,102 @@
 
     angular
         .module('app')
+        .controller('loginController', loginController);
+
+    loginController.$inject = ['userService', '$state', '$localStorage'];
+
+    function loginController(userService, $state, $localStorage) {
+        var vm = this;
+        vm.login = login;
+
+        function login(user){
+            console.log('go to login');
+            userService.userAuth(user)
+                .then(function (res) {
+                        console.log('res.data', res.data);
+                        $localStorage.token = res.data.token;
+                        $localStorage.user = res.data.user;
+                        $state.go('view');
+                    }
+                    , function (err) {
+                        console.log(err.message);
+                        vm.userExists = true;
+                    });
+        }
+
+    }
+})();
+/**
+ * Created by HP on 1/13/2017.
+ */
+
+(function () {
+    'use strict';
+
+    angular
+        .module('app')
         .controller('menuController', menuController);
 
-    menuController.$inject = ['MenuService', '$localStorage', 'orderService'];
+    menuController.$inject = ['MenuService', '$localStorage', 'orderService', '$scope', '$mdDialog', '$rootScope'];
 
-    function menuController(MenuService, $localStorage, orderService) {
+    function menuController(MenuService, $localStorage, orderService, $scope, $mdDialog, $rootScope) {
         var vm = this;
         vm.makeOrder = makeOrder;
         MenuService.getMenu(function (data) {
             vm.menu = data;
         });
 
-        function makeOrder(dishId) {
-            console.log(vm.menu);
+        function makeOrder(dishId, ev) {
             orderService.placeOrder({
                 userId: $localStorage.user,
                 dishId: dishId,
                 time: new Date()
             })
                 .then(function (res) {
-                        console.log(res)
+                        if(res.status == 200){
+                            $rootScope.success = true;
+                            allert(ev);
+                        }
                     }
                     , function (err) {
-                        console.log(err);
+                        $rootScope.success = false;
+                        allert(ev);
                     });
         }
+        $scope.customFullscreen = false;
 
+        function DialogController($scope, $mdDialog, $state) {
+            $scope.success = function () {
+                return $rootScope.success;
+            };
+            $scope.failed = function(){
+                return !$rootScope.success;
+            };
+
+            $scope.goToAccount = function(){
+                $scope.cancel();
+                $state.go('view');
+            }
+
+            $scope.cancel = function () {
+                $mdDialog.cancel();
+            };
+        }
+        function allert(ev) {
+            $mdDialog.show({
+                controller: DialogController,
+                templateUrl: '/app/pages/menu/dialog1.tmpl.html',
+                parent: angular.element(document.body),
+                targetEvent: ev,
+                clickOutsideToClose:true,
+                fullscreen: $scope.customFullscreen // Only for -xs, -sm breakpoints.
+            })
+                .then(function(answer) {
+                    $scope.status = 'You said the information was "' + answer + '".';
+                }, function() {
+                    $scope.status = 'You cancelled the dialog.';
+                });
+        };
 
     }
 })();
@@ -460,21 +496,27 @@
         vm.status = ['Ordered', 'In Progress', 'To Delivery', 'Delivered', 'Problems to Deliver'];
         orderService.getOrdersForClient(vm.user)
             .then(function (data) {
-
                     vm.dishes = data.data.map(function (item) {
+                        var times = parseTime(item.time);
                         return {
                             _id: item._id,
                             status: item.status,
                             dish: item.dishes[0],
                             userId: item.userId,
-                            dishId: item.dishId
+                            dishId: item.dishId,
+                            time: times
                         }
                     });
-                    console.log('vm.dishes', vm.dishes);
                 }
                 , function (err) {
                     console.log('err', err);
                 });
+
+        function parseTime(times){
+            return times.map(function(item){
+                return   moment(item).format('MMMM Do, h:mm');
+            })
+        }
     }
 })();
 /**

@@ -21,7 +21,8 @@
         </md-card-actions>
         <md-card-content>
             <div class="md-headline">Order Status</div>
-            <div>{{vm.status[item.status]}}</div>
+            <div ng-repeat="time in item.time track by $index"><span ng-if="$index == 3">{{vm.status[item.status]}}</span>
+                <span ng-if="$index < 3">{{vm.status[$index]}}&nbsp;{{time}}</span></div>
         </md-card-content>
     </md-card>
 </md-content>

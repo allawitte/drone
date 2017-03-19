@@ -21,11 +21,11 @@
 
 
         function placeOrder(data) {
-            return $http.post('/order', data);
+            return $http.post('/order/', data);
         }
 
         function getOrders() {
-            return $http.get('/order/cook');
+            return $http.get('/cook/order');
         }
 
         function changeOrderStatus(data) {

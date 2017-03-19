@@ -1,5 +1,5 @@
 
-<md-list flex>
+<md-list flex id="popupContainer">
     <md-subheader class="md-no-sticky">Menu</md-subheader>
     <md-list-item class="md-3-line" ng-repeat="item in vm.menu track by $index" ng-click="null">
         <img ng-src="{{item.image}}?{{$index}}" class="md-avatar" alt="{{item.title}}" />
@@ -11,8 +11,18 @@
                 <span ng-repeat="ingredient in item.ingredients track by $index">{{ingredient}}&nbsp;</span>
             </p>
         </div>
-        <md-button class="md-raised md-warn" ng-click="vm.makeOrder(item.id)">Make Order</md-button>
+        <md-button class="md-raised md-warn" ng-click="vm.makeOrder(item.id, $event)">Make Order</md-button>
     </md-list-item>
     <md-divider ></md-divider>
 
 </md-list>
+<div class="md-padding" id="popupContainer" ng-cloak>
+    <div class="dialog-demo-content" layout="row" layout-wrap layout-margin layout-align="center">
+        <md-button class="md-primary md-raised" ng-click="showAdvanced($event)">
+            Custom Dialog
+        </md-button>
+    </div>
+
+
+
+</div>

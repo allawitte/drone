@@ -13,21 +13,27 @@
         vm.status = ['Ordered', 'In Progress', 'To Delivery', 'Delivered', 'Problems to Deliver'];
         orderService.getOrdersForClient(vm.user)
             .then(function (data) {
-
                     vm.dishes = data.data.map(function (item) {
+                        var times = parseTime(item.time);
                         return {
                             _id: item._id,
                             status: item.status,
                             dish: item.dishes[0],
                             userId: item.userId,
-                            dishId: item.dishId
+                            dishId: item.dishId,
+                            time: times
                         }
                     });
-                    console.log('vm.dishes', vm.dishes);
                 }
                 , function (err) {
                     console.log('err', err);
                 });
+
+        function parseTime(times){
+            return times.map(function(item){
+                return   moment(item).format('MMMM Do, h:mm');
+            })
+        }
     }
 })();
 /**

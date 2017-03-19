@@ -13,7 +13,7 @@ var config = require('./config'); // get our config file
 var User = require('./server/modules/user'); // get our mongoose model
 var Order = require('./server/modules/order'); // get our mongoose model
 
-app.set('port', process.env.PORT || '8000');
+app.set('port', process.env.PORT || '8880');
 //mongoose.connect(config.database); // connect to database
 app.set('superSecret', config.secret); // secret variable
 
@@ -22,6 +22,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 var db = require('./server/modules/db.js');
+var menuList = require('./server/modules/menulist');
 
 app.use(morgan('dev'));
 
@@ -69,7 +70,7 @@ app.post('/register', function (req, res) {
     })
 });
 
-app.get('/user/:clientId', function(req, res){
+app.get('/user/:clientId', function (req, res) {
     var clientId = req.params.clientId;
     var mongooseId = new mongoose.mongo.ObjectId(clientId);
     User.find({_id: mongooseId}, function (err, users) {
@@ -77,14 +78,14 @@ app.get('/user/:clientId', function(req, res){
     })
 });
 
-app.put('/user/topup/:clientId', function(req, res){
+app.put('/user/topup/:clientId', function (req, res) {
     var clientId = req.params.clientId;
     var mongooseId = new mongoose.mongo.ObjectId(clientId);
     User.findOneAndUpdate({_id: mongooseId}, {$inc: {account: req.body.account}}, {new: true}, function (err, user) {
-        if(!err){
+        if (!err) {
             res.json(user);
         }
-        else{
+        else {
             res.json(err);
         }
     });
@@ -124,13 +125,32 @@ app.post('/order', function (req, res) {
     });
     var mongooseId = new mongoose.mongo.ObjectId(req.body.userId);
     User.findOne({_id: mongooseId}, function (err, user) {
-        console.log('Users account is', user.account);
+        var userAccount = user.account;
+        menuList.findOne({id: newOrder.dishId}, function (err, dish) {
+            var dishPrice = dish.price;
+            if (userAccount - dishPrice >= 0) {
+                newOrder.save(function (err) {
+                    if (err)throw err;
+                    console.log('Order saved successfully');
+                    res.status(200).json({success: true});
+                    User.findOneAndUpdate({_id: mongooseId}, {$inc: {account: -dishPrice}}, {new: true}, function (err, user) {
+                        if (err) {
+                            console.log(err)
+                        }
+                        else {
+                            console.log(user.account);
+                        }
+                    });
+                });
+            }
+            else {
+                console.log('order is not saved. No money on account');
+                res.status(415).json({success: false});
+            }
+        });
+
     });
-    newOrder.save(function (err) {
-        if (err)throw err;
-        console.log('Order saved successfully');
-        res.json({success: true, status: 200});
-    })
+
 });
 
 app.put('/order/change-status', function (req, res) {
@@ -144,6 +164,7 @@ app.put('/order/change-status', function (req, res) {
         }
         else {
             foundOrder.status = status;
+            foundOrder.time.push(new Date());
             foundOrder.save(function (err, updatedObject) {
                 if (err) {
                     res.status(500).send();
@@ -155,6 +176,7 @@ app.put('/order/change-status', function (req, res) {
                             .then(() => {
                                 console.log('Доставлено');
                                 updatedObject.status = 3;
+                                updatedObject.time.push(new Date());
                                 updatedObject.save(function (err, savedObject) {
                                     if (err) {
                                         console.log('err', err)
@@ -167,6 +189,7 @@ app.put('/order/change-status', function (req, res) {
                             .catch(() => {
                                 console.log('Возникли сложности');
                                 updatedObject.status = 4;
+                                updatedObject.time.push(new Date());
                                 updatedObject.save(function (err, savedObject) {
                                     if (err) {
                                         console.log('err', err)
@@ -213,9 +236,9 @@ app.get('/order/:clientId', function (req, res) {
     )
 });
 
-app.get('/order/cook', function (req, res) {
+app.get('/cook/order', function (req, res) {
     dbjs.orders.aggregate(
-        {$match: {status: {"$lte": 2}}}
+        {$match: {'status': {"$lte": 2}}}
         , {
             $lookup: {
                 from: "menu",
