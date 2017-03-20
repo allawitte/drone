@@ -75,10 +75,12 @@ app.post('/register', function (req, res) {
 
 app.get('/user/:clientId', function (req, res) {
     var clientId = req.params.clientId;
-    var mongooseId = new mongoose.mongo.ObjectId(clientId);
-    User.find({_id: mongooseId}, function (err, users) {
-        res.json(users);
-    })
+    if (clientId !== 'undefined'){
+        var mongooseId = new mongoose.mongo.ObjectId(clientId);
+        User.find({_id: mongooseId}, function (err, users) {
+            res.json(users);
+        });
+    }
 });
 
 app.put('/user/topup/:clientId', function (req, res) {
