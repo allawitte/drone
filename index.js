@@ -29,7 +29,7 @@ var menuList = require('./server/modules/menulist');
 app.use(morgan('dev'));
 
 app.use(express.static(__dirname + '/public'));
-//app.use(express.static(__dirname));
+app.use(express.static(__dirname + '/bower_components'));
 
 app.get('/', function (req, res) {
     res.render('index.html');
@@ -290,9 +290,11 @@ io.sockets.on('connection', function (socket) {
     });
 });
 
-app.listen(app.get('port'), function () {
-    console.log('Express started on port http://localhost:' + app.get('port'));
-});
+http.listen(8000);
+
+// app.listen(app.get('port'), function () {
+//     console.log('Express started on port http://localhost:' + app.get('port'));
+// });
 /**
  * Created by HP on 12/19/2016.
  */
