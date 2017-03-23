@@ -28,6 +28,10 @@ var menuList = require('./server/modules/menulist');
 
 app.use(morgan('dev'));
 
+http.listen(8000, function(){
+    console.log('Server starts on port 8000');
+});
+
 app.use(express.static(__dirname + '/public'));
 app.use(express.static(__dirname + '/bower_components'));
 
@@ -126,7 +130,7 @@ app.post('/order', function (req, res) {
         userId: req.body.userId,
         dishId: req.body.dishId,
         status: 0,
-        time: [req.body.time]
+        time: [{status: 0, moment: req.body.time}]
     });
     var mongooseId = new mongoose.mongo.ObjectId(req.body.userId);
     User.findOne({_id: mongooseId}, function (err, user) {
@@ -159,7 +163,6 @@ app.post('/order', function (req, res) {
 });
 
 app.put('/order/change-status', function (req, res) {
-    console.log('req', req.body);
     var id = req.body._id;
     var status = req.body.status;
 
@@ -169,7 +172,7 @@ app.put('/order/change-status', function (req, res) {
         }
         else {
             foundOrder.status = status;
-            foundOrder.time.push(new Date());
+            foundOrder.time.push({status: foundOrder.status, moment: new Date()});
             foundOrder.save(function (err, updatedObject) {
                 if (err) {
                     res.status(500).send();
@@ -181,34 +184,39 @@ app.put('/order/change-status', function (req, res) {
                             .then(() => {
                                 console.log('Доставлено');
                                 updatedObject.status = 3;
-                                updatedObject.time.push(new Date());
+                                updatedObject.time.push({status: updatedObject.status, moment: new Date()});
                                 updatedObject.save(function (err, savedObject) {
                                     if (err) {
                                         console.log('err', err)
                                     }
                                     else {
                                         console.log('savedObject', savedObject);
+                                        io.sockets.emit('order', savedObject);
                                     }
                                 });
                             })
                             .catch(() => {
                                 console.log('Возникли сложности');
                                 updatedObject.status = 4;
-                                updatedObject.time.push(new Date());
+                                updatedObject.time.push({status: updatedObject.status, moment: new Date()});
                                 updatedObject.save(function (err, savedObject) {
                                     if (err) {
                                         console.log('err', err)
                                     }
                                     else {
                                         console.log('savedObject', savedObject);
+                                        io.sockets.emit('order', savedObject);
                                     }
                                 });
                             });
                     }
+
                     res.json({data: updatedObject, status: 200});
                 }
             })
         }
+        io.sockets.emit('order', foundOrder);
+
         console.log('updated', foundOrder);
     });
 
@@ -219,7 +227,6 @@ var dbjs = mongojs('drone', ['menu', 'orders', 'users']);
 
 app.get('/order/:clientId', function (req, res) {
     var clientId = req.params.clientId;
-    console.log('clientId', clientId);
     dbjs.orders.aggregate(
         {$match: {userId: clientId}}
         , {
@@ -235,7 +242,6 @@ app.get('/order/:clientId', function (req, res) {
                 console.log(error);
             }
             else {
-                console.log(result);
                 res.status(200).json(result);
             }
         }
@@ -276,21 +282,18 @@ app.get('/cook/order', function (req, res) {
 });
 
 
+// io.sockets.on('connection', function (socket) {
+//     console.log('io connection');
+//     socket.emit('news', { hello: 'world' });
+//     socket.on('my other event', function (data) {
+//         console.log('socket.io data', data);
+//     });
+//     socket.on('disconnect', function () {
+//         console.log('user disconnected');
+//     });
+// });
 
-// var server = http.createServer();
-//
-// io = io.listen(server);
-io.sockets.on('connection', function (socket) {
-    socket.emit('news', { hello: 'world' });
-    socket.on('my other event', function (data) {
-        console.log('socket.io data', data);
-    });
-    socket.on('disconnect', function () {
-        console.log('user disconnected');
-    });
-});
 
-http.listen(8000);
 
 // app.listen(app.get('port'), function () {
 //     console.log('Express started on port http://localhost:' + app.get('port'));

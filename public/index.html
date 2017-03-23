@@ -34,14 +34,14 @@
 </body>
 <script src='lib.js'></script>
 
-<script>
+<!--script>
     //var socket = io.connect('http://localhost:8000');
     var socket = io();
     socket.on('news', function (data) {
         console.log('data:', data);
         socket.emit('my other event', { my: 'data' });
     });
-</script>
+</script-->
 <script src='app.js'></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/angular-material-icons/0.7.1/angular-material-icons.min.js"></script>
 </html>
