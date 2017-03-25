@@ -5,9 +5,9 @@
         .module('app')
         .controller('registerController', registerController);
 
-    registerController.$inject = ['userService'];
+    registerController.$inject = ['userService', '$state', '$localStorage'];
 
-    function registerController(userService) {
+    function registerController(userService, $state, $localStorage) {
         var vm = this;
         vm.isDidabled = isDidabled;
         vm.save = save;
@@ -19,11 +19,13 @@
         function save(user) {
             user.account = 0;
             userService.userCreate(user)
-                .then(function (result) {
-                        console.log('success', result);
+                .then(function (res) {
+                        console.log('success', res);
+                        $localStorage.user = res.data.user._id;
+                        $state.go('view');
                     }
                     , function (err) {
-                        if(err.status == 403){
+                        if (err.status == 433) {
                             vm.userExists = true;
                             console.log('User already exists');
                         }

@@ -13,7 +13,7 @@
         vm.user = $localStorage.user;
         userService.getUser(vm.user)
             .then(function (data) {
-                    vm.userData = data.data[0];
+                    vm.userData = data.data;
                 }
                 , function (err) {
                     console.log(err);

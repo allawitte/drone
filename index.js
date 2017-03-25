@@ -28,7 +28,7 @@ var menuList = require('./server/modules/menulist');
 
 app.use(morgan('dev'));
 
-http.listen(8000, function(){
+http.listen(8000, function () {
     console.log('Server starts on port 8000');
 });
 
@@ -43,16 +43,31 @@ app.get('/', function (req, res) {
 app.use(require('body-parser').urlencoded({extended: true}));
 app.use(bodyParser.json());
 
-// app.use('/order/*', function(req, res, next){
-//     console.log('order', req.params);
-//     next();
-// });
-
 
 app.get('/menu', function (req, res) {
     db.getMenu(req, res)
 });
 
+function saveNewUser(req, res, newUser) {
+    newUser.save(
+        function (err, user) {
+            if (err) throw err;
+
+            console.log('User saved successfully', user);
+            res.status(200).json({user});
+        });
+}
+
+app.use('/register', function (req, res, next) {
+    User.findOne({email: req.body.email}, function (err, user) {
+        if (!user) {
+            next();
+        }
+        else {
+            res.status(433).json({message: 'User already exists'});
+        }
+    })
+});
 app.post('/register', function (req, res) {
     var newUser = new User({
         email: req.body.email,
@@ -60,31 +75,18 @@ app.post('/register', function (req, res) {
         cook: false,
         account: 0
     });
-    User.find({email: req.body.email}, function (err, users) {
-        if (users.length == 0) {
-            newUser.save(
-                function (err) {
-                    if (err) throw err;
-
-                    console.log('User saved successfully');
-                    res.json({success: true, status: 200});
-                });
-        }
-        else {
-            console.log('User alreay exists');
-            res.status(403).json({message: 'User already exists'});
-        }
-    })
+    saveNewUser(req, res, newUser);
 });
 
 app.get('/user/:clientId', function (req, res) {
     var clientId = req.params.clientId;
-    if (clientId !== 'undefined'){
+    if (clientId !== 'undefined') {
         var mongooseId = new mongoose.mongo.ObjectId(clientId);
-        User.find({_id: mongooseId}, function (err, users) {
-            res.json(users);
+        User.findOne({_id: mongooseId}, function (err, user) {
+            res.status(200).json(user);
         });
     }
+    else res.status(404).send('user does not exist');
 });
 
 app.put('/user/topup/:clientId', function (req, res) {
@@ -92,10 +94,10 @@ app.put('/user/topup/:clientId', function (req, res) {
     var mongooseId = new mongoose.mongo.ObjectId(clientId);
     User.findOneAndUpdate({_id: mongooseId}, {$inc: {account: req.body.account}}, {new: true}, function (err, user) {
         if (!err) {
-            res.json(user);
+            res.status(433).send('User does not exists');
         }
         else {
-            res.json(err);
+            res.status(200).json(err);
         }
     });
 
@@ -104,22 +106,17 @@ app.put('/user/topup/:clientId', function (req, res) {
 app.post('/auth', function (req, res) {
     User.findOne({email: req.body.email, password: req.body.password}, function (err, user) {
         if (user) {
-            console.log('User exists');
-            console.log(app.get('superSecret'));
             var token = jwt.sign(user, app.get('superSecret'), {
                 expiresIn: 1440 // expires in 24 hours
             });
 
-            // return the information including token as JSON
             res.status(200).json({
                 success: true,
                 user: user._id,
                 token: token
             });
         }
-
         else {
-            console.log('User do not exists');
             res.status(404).json({message: 'User do not exists'});
         }
     });
@@ -133,6 +130,9 @@ app.post('/order', function (req, res) {
         time: [{status: 0, moment: req.body.time}]
     });
     var mongooseId = new mongoose.mongo.ObjectId(req.body.userId);
+    if (!req.body.userId) {
+        res.status(403).send('no order to unregistered user');
+    }
     User.findOne({_id: mongooseId}, function (err, user) {
         var userAccount = user.account;
         menuList.findOne({id: newOrder.dishId}, function (err, dish) {
@@ -162,56 +162,55 @@ app.post('/order', function (req, res) {
 
 });
 
+function updateStatus(updatedObject, status){
+    updatedObject.status = status;
+    updatedObject.time.push({status: status, moment: new Date()});
+    updatedObject.save(function (err, savedObject) {
+        if (err) {
+            console.log('err', err)
+        }
+        else {
+            console.log('savedObject', savedObject);
+            io.sockets.emit('order', savedObject);
+        }
+    });
+}
+
+function deliveryResult(updatedObject){
+    drone
+        .deliver()
+        .then(() => {
+            console.log('Доставлено');
+            updateStatus(updatedObject, 3);
+
+        })
+        .catch(() => {
+            console.log('Возникли сложности');
+            updateStatus(updatedObject, 4);
+        });
+}
+
 app.put('/order/change-status', function (req, res) {
     var id = req.body._id;
     var status = req.body.status;
+    var time = req.body.time.push({status: status, moment: new Date()});
 
     Order.findOne({_id: id}, function (err, foundOrder) {
         if (err) {
-            res.status(500).send();
+            res.status(500).send('Error to find order: '+id);
         }
         else {
             foundOrder.status = status;
-            foundOrder.time.push({status: foundOrder.status, moment: new Date()});
+            foundOrder.time.push({status: status, moment: new Date()});
             foundOrder.save(function (err, updatedObject) {
                 if (err) {
-                    res.status(500).send();
+                    res.status(500).send('Unable to save order updates id:', id);
                 }
                 else {
                     if (status == 2) {
-                        drone
-                            .deliver()
-                            .then(() => {
-                                console.log('Доставлено');
-                                updatedObject.status = 3;
-                                updatedObject.time.push({status: updatedObject.status, moment: new Date()});
-                                updatedObject.save(function (err, savedObject) {
-                                    if (err) {
-                                        console.log('err', err)
-                                    }
-                                    else {
-                                        console.log('savedObject', savedObject);
-                                        io.sockets.emit('order', savedObject);
-                                    }
-                                });
-                            })
-                            .catch(() => {
-                                console.log('Возникли сложности');
-                                updatedObject.status = 4;
-                                updatedObject.time.push({status: updatedObject.status, moment: new Date()});
-                                updatedObject.save(function (err, savedObject) {
-                                    if (err) {
-                                        console.log('err', err)
-                                    }
-                                    else {
-                                        console.log('savedObject', savedObject);
-                                        io.sockets.emit('order', savedObject);
-                                    }
-                                });
-                            });
+                        deliveryResult(updatedObject);
                     }
-
-                    res.json({data: updatedObject, status: 200});
+                    res.status(200).json({data: updatedObject});
                 }
             })
         }
@@ -281,6 +280,8 @@ app.get('/cook/order', function (req, res) {
     // });
 });
 
+module.exports = app;
+
 
 // io.sockets.on('connection', function (socket) {
 //     console.log('io connection');
@@ -292,7 +293,6 @@ app.get('/cook/order', function (req, res) {
 //         console.log('user disconnected');
 //     });
 // });
-
 
 
 // app.listen(app.get('port'), function () {

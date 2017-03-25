@@ -31,7 +31,8 @@
                             status: item.status,
                             dish: item.dishes[0],
                             userId: item.userId,
-                            dishId: item.dishId
+                            dishId: item.dishId,
+                            time: item.time
                         }
                     });
 
