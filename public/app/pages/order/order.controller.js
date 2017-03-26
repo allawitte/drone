@@ -27,6 +27,7 @@
         });
         orderService.getOrdersForClient(vm.user)
             .then(function (data) {
+                console.log('data', data);
                     vm.dishes = data.data.map(function (item) {
                         var times = parseTime(item.time);
                         return {

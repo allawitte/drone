@@ -14,6 +14,7 @@ var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
 var config = require('./config'); // get our config file
 var User = require('./server/modules/user'); // get our mongoose model
 var Order = require('./server/modules/order'); // get our mongoose model
+var router = require('./server/router');
 
 app.set('port', process.env.PORT || '8000');
 //mongoose.connect(config.database); // connect to database
@@ -44,39 +45,34 @@ app.use(require('body-parser').urlencoded({extended: true}));
 app.use(bodyParser.json());
 
 
-app.get('/menu', function (req, res) {
-    db.getMenu(req, res)
-});
-
-function saveNewUser(req, res, newUser) {
-    newUser.save(
-        function (err, user) {
-            if (err) throw err;
-
-            console.log('User saved successfully', user);
-            res.status(200).json({user});
-        });
-}
-
-app.use('/register', function (req, res, next) {
-    User.findOne({email: req.body.email}, function (err, user) {
-        if (!user) {
-            next();
-        }
-        else {
-            res.status(433).json({message: 'User already exists'});
-        }
-    })
-});
-app.post('/register', function (req, res) {
-    var newUser = new User({
-        email: req.body.email,
-        password: req.body.password,
-        cook: false,
-        account: 0
-    });
-    saveNewUser(req, res, newUser);
-});
+app.get('/menu', router.getMenuList);
+app.use('/register', router.checkUserExistence);
+app.post('/register', router.createUser);
+// app.get('/menu', function (req, res) {
+//     db.getMenu(req, res)
+// });
+//
+//
+//
+// app.use('/register', function (req, res, next) {
+//     User.findOne({email: req.body.email}, function (err, user) {
+//         if (!user) {
+//             next();
+//         }
+//         else {
+//             res.status(433).json({message: 'User already exists'});
+//         }
+//     })
+// });
+// app.post('/register', function (req, res) {
+//     var newUser = new User({
+//         email: req.body.email,
+//         password: req.body.password,
+//         cook: false,
+//         account: 0
+//     });
+//     saveNewUser(req, res, newUser);
+// });
 
 app.get('/user/:clientId', function (req, res) {
     var clientId = req.params.clientId;
@@ -93,11 +89,11 @@ app.put('/user/topup/:clientId', function (req, res) {
     var clientId = req.params.clientId;
     var mongooseId = new mongoose.mongo.ObjectId(clientId);
     User.findOneAndUpdate({_id: mongooseId}, {$inc: {account: req.body.account}}, {new: true}, function (err, user) {
-        if (!err) {
+        if (err) {
             res.status(433).send('User does not exists');
         }
         else {
-            res.status(200).json(err);
+            res.status(200).json(user);
         }
     });
 
@@ -162,7 +158,7 @@ app.post('/order', function (req, res) {
 
 });
 
-function updateStatus(updatedObject, status){
+function updateStatus(updatedObject, status) {
     updatedObject.status = status;
     updatedObject.time.push({status: status, moment: new Date()});
     updatedObject.save(function (err, savedObject) {
@@ -176,7 +172,9 @@ function updateStatus(updatedObject, status){
     });
 }
 
-function deliveryResult(updatedObject){
+function deliveryResult(updatedObject) {
+    console.log('updatedObject', updatedObject);
+
     drone
         .deliver()
         .then(() => {
@@ -193,27 +191,25 @@ function deliveryResult(updatedObject){
 app.put('/order/change-status', function (req, res) {
     var id = req.body._id;
     var status = req.body.status;
-    var time = req.body.time.push({status: status, moment: new Date()});
+    var time = req.body.time;
+    time.push({status: status, moment: new Date()});
 
-    Order.findOne({_id: id}, function (err, foundOrder) {
+    Order.findOneAndUpdate({_id: id}, {
+        $set: {
+            "status": status,
+            "time": time
+        }
+    }, {new: true}, function (err, foundOrder) {
         if (err) {
-            res.status(500).send('Error to find order: '+id);
+            res.status(500).send('Error to update order: ' + id);
         }
         else {
-            foundOrder.status = status;
-            foundOrder.time.push({status: status, moment: new Date()});
-            foundOrder.save(function (err, updatedObject) {
-                if (err) {
-                    res.status(500).send('Unable to save order updates id:', id);
-                }
-                else {
-                    if (status == 2) {
-                        deliveryResult(updatedObject);
-                    }
-                    res.status(200).json({data: updatedObject});
-                }
-            })
+            if (foundOrder.status == 2) {
+                deliveryResult(foundOrder);
+            }
+            res.status(200).json({data: foundOrder});
         }
+
         io.sockets.emit('order', foundOrder);
 
         console.log('updated', foundOrder);

@@ -5,11 +5,22 @@
         .module('app')
         .controller('cookController', cookController);
 
-    cookController.$inject = ['orderService', '$scope'];
+    cookController.$inject = ['orderService', '$scope', 'socketService'];
 
-    function cookController(orderService, $scope) {
+    function cookController(orderService, $scope, socketService) {
         var vm = this;
         vm.changeStatuse = changeStatuse;
+
+        socketService.on('order', function (data) {
+            console.log('data', data);
+            if (Array.isArray(vm.dishes)) {
+                vm.dishes.forEach(function(item, index){
+                    if(item._id == data._id){
+                        item.time = data.time;
+                    }
+                });
+            }
+        });
 
         function changeStatuse(item) {
             console.log('item', item);
