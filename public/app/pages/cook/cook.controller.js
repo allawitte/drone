@@ -5,28 +5,50 @@
         .module('app')
         .controller('cookController', cookController);
 
-    cookController.$inject = ['orderService', '$scope', 'socketService'];
+    cookController.$inject = ['orderService', '$scope', '$timeout'];
 
-    function cookController(orderService, $scope, socketService) {
+    function cookController(orderService, $scope, $timeout) {
         var vm = this;
-        vm.changeStatuse = changeStatuse;
-
-        socketService.on('order', function (data) {
-            console.log('data', data);
-            if (Array.isArray(vm.dishes)) {
-                vm.dishes.forEach(function(item, index){
-                    if(item._id == data._id){
-                        item.time = data.time;
+        vm.changeStatus = changeStatus;
+        setInterval(function () {
+            if (Array.isArray($scope.proceedDishes)) {
+                $scope.proceedDishes.forEach(function (meal) {
+                    if ('duration' in meal) {
+                        changeTime(meal);
                     }
                 });
+                $scope.$apply();
             }
-        });
+        }, 1000);
 
-        function changeStatuse(item) {
-            console.log('item', item);
+
+        function changeTime(meal) {
+            var now = moment();
+            if (meal.status == 1) {
+                meal.time.forEach(function (time) {
+                    if (time.status == 1) {
+                        var start = moment(time.moment);
+                        meal.duration = {
+                            seconds: now.diff(start, 'seconds') % 60,
+                            minutes: now.diff(start, 'minutes') % 60,
+                            hour: now.diff(start, 'hours') % 24,
+                            days: now.diff(start, 'days')
+                        };
+                    }
+
+                });
+                return meal.duration;
+            }
+        }
+
+        function changeStatus(item, status) {
+            item.status = status;
+            item.time.push({status: status, moment: new Date()});
             orderService.changeOrderStatus(item)
                 .then(function (res) {
-                        console.log(res)
+                        if (status == 1) {
+                            splitMeals(vm.dishes);
+                        }
                     },
                     function (err) {
                         console.log(err);
@@ -46,14 +68,36 @@
                             time: item.time
                         }
                     });
+                    splitMeals(vm.dishes);
 
-                    console.log(vm.dishes);
                 }
                 , function (err) {
                     console.log(err);
                 });
 
+        function splitMeals(meals) {
+            vm.orderedDishes = [];
+            $scope.proceedDishes = [];
+            meals.forEach(function (meal) {
+                if (meal.status == 0) {
+                    vm.orderedDishes.push(meal);
+                }
+                else {
+                    if (meal.status == 1) {
+                        meal.time.forEach(function (time) {
+                            if (time.status == 1) {
+                                if (!('duration' in meal)) {
+                                    changeTime(meal);
+                                }
+                            }
+                        });
+                    }
+                    $scope.proceedDishes.push(meal);
 
+                }
+            });
+
+        }
 
     }
 })();

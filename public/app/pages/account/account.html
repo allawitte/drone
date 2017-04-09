@@ -1,0 +1,34 @@
+<h2>Your Account</h2>
+<div layout="row" layout-padding layout-wrap layout-fill style="padding-bottom: 32px;" ng-cloak>
+
+    <md-whiteframe class="md-whiteframe-1dp" flex-sm="45" flex-gt-sm="35" flex-gt-md="25" layout
+                   layout-align="center center">
+        <span>You have on account:&nbsp;<span ng-bind="vm.userData.account"></span></span>
+    </md-whiteframe>
+</div>
+<md-button class="md-warn md-raised md-hue-2" ng-click="vm.topUp()">Top Up</md-button>
+
+    <h2 class="md-title center">Undelivered orders</h2>
+
+<md-content flex layout-padding>
+    Sorry, the next your orders were not delivered for some reasons. You can just return your money back to the account
+    or order another meal with 5% discount.
+</md-content>
+<md-content class="md-padding" layout-xs="column" layout="row">
+    <md-card md-theme="{{ showDarkTheme ? 'dark-purple' : 'default' }}" md-theme-watch
+             ng-repeat="item in vm.faledOrders" ng-if="item.discount">
+        <md-card-title>
+            <md-card-title-text>
+                <span class="md-headline">Order #{{item._id}}</span>
+                <span class="md-subhead">Price: {{item.payment}}</span>
+            </md-card-title-text>
+            <md-card-title-media>
+                <div class="md-media-sm card-media"></div>
+            </md-card-title-media>
+        </md-card-title>
+        <md-card-actions layout="row" layout-align="end center">
+            <md-button ng-click="vm.refund(item._id, item.payment)">Money back</md-button>
+            <md-button ng-click="vm.refund(item._id, item.payment, true)">Get 5% discount</md-button>
+        </md-card-actions>
+    </md-card>
+</md-content>

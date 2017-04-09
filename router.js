@@ -2,24 +2,21 @@
 var express = require('express');
 var app = express();
 var router = express.Router();
-var config = require('../config'); // get our config file
+var config = require('./config'); // get our config file
 var mongoose = require('mongoose');
 var jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
-var User = require('./modules/user'); // get our mongoose model
-var Order = require('./modules/order'); // get our mongoose model
-var db = require('./modules/db.js');
-var menuList = require('./modules/menulist');
-const drone = require('netology-fake-drone-api')
+var User = require('./server/modules/user'); // get our mongoose model
+var Order = require('./server/modules/order'); // get our mongoose model
+var db = require('./server/modules/db.js');
+var menuList = require('./server/modules/menulist');
+const drone = require('netology-fake-drone-api');
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var mongojs = require('mongojs');
 var dbjs = mongojs('drone', ['menu', 'orders', 'users']);
 
 app.set('superSecret', config.secret); // secret variable
-//http.listen('8000');
-var server = http.listen('8000', function () {
-    console.log('Server starts on port 8000');
-});
+
 
 function saveNewUser(req, res, newUser) {
     newUser.save(

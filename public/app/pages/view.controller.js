@@ -5,29 +5,12 @@
         .module('app')
         .controller('viewController', viewController);
 
-    viewController.$inject = ['userService', '$localStorage'];
+    viewController.$inject = ['$localStorage', '$state'];
 
-    function viewController(userService, $localStorage) {
+    function viewController($localStorage, $state) {
         var vm = this;
-        vm.topUp = topUp;
         vm.user = $localStorage.user;
-        userService.getUser(vm.user)
-            .then(function (data) {
-                    vm.userData = data.data;
-                }
-                , function (err) {
-                    console.log(err);
-                });
-
-        function topUp() {
-            userService.topUp(vm.user, {account: 100})
-                .then(function (data) {
-                        vm.userData = data.data;
-                    }
-                    , function (err) {
-                        console.log(err);
-                    });
-        }
+        
 
 
     }

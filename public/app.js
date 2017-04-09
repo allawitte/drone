@@ -1,4 +1,4 @@
-(function(){
+(function () {
     'use strict';
     angular.module('app', ['ui.router', 'ngMaterial', 'ngMdIcons', 'ngMessages', 'ngStorage']);
 })();
@@ -13,33 +13,71 @@
 
     angular
         .module('app')
+        .run(run)
         .controller('MainController', MainController);
 
-    MainController.$inject = ['$scope', 'authService', '$localStorage'];
+    run.$inject = ['$localStorage', '$state', '$rootScope'];
+    function run($localStorage, $state, $rootScope) {
+        console.log('function run');
+        $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
 
-    function MainController($scope, authService, $localStorage) {
+            if (notLoggedIn() && notAuthPage(toState.url)) {
+                event.preventDefault();
+                return $state.go('login');
+            }
+            return;
+        });
+
+        function notAuthPage(url) {
+            if (url != '/login' && url != '/register') {
+                return true;
+            }
+            return false;
+        }
+
+        function notLoggedIn() {
+            if ($localStorage.user) {
+                return false
+            }
+            else return true;
+        }
+
+    }
+
+    MainController.$inject = ['$scope', 'authService', '$rootScope', '$state'];
+
+    function MainController($scope, authService, $rootScope, $state) {
         var vm = this;
+        vm.goTo = goTo;
         $scope.logOut = logOut;
-
-        vm.userId = $localStorage.user;
-
-        console.log('vm.userId', vm.userId);
-
-        $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+        console.log('main menu');
+        $scope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {
+            $rootScope.bg = toState.id;
+            if(fromState.url === '/login'){
+                $rootScope.isLogged = true;
+            }
             $scope.currentNavItem = toState.id;
         });
-        if(authService.checkAuth()){
-            $scope.isLogged = true;
+
+        if (authService.checkAuth()) {
+            $rootScope.isLogged = true;
         }
-        
-        function logOut(){
-            console.log('log out');
+
+
+        function logOut() {
             authService.cancelAuth();
-            $scope.isLogged = false;
+            $rootScope.isLogged = false;
+            $state.go('view');
         }
+
+        function goTo(location){
+            $state.go(location);
+        }
+
 
 
     }
+
 })();
 /**
  * Created by HP on 1/12/2017.
@@ -84,14 +122,14 @@
                 controller: 'loginController',
                 templateUrl: 'app/pages/login/login.html',
                 controllerAs: 'vm',
-                id: "view"
+                id: "login"
             })
             .state('register', {
                 url: '/register',
                 controller: 'registerController',
                 templateUrl: 'app/pages/register/register.html',
                 controllerAs: 'vm',
-                id: "view"
+                id: "register"
             })
             .state('cook', {
                 url: '/cook',
@@ -100,6 +138,13 @@
                 controllerAs: 'vm',
                 id: "cook"
             })
+            .state('account', {
+            url: '/account',
+            controller: 'accountController',
+            templateUrl: 'app/pages/account/account.html',
+            controllerAs: 'vm',
+            id: "account"
+        })
 
     }
 })();
@@ -114,29 +159,12 @@
         .module('app')
         .controller('viewController', viewController);
 
-    viewController.$inject = ['userService', '$localStorage'];
+    viewController.$inject = ['$localStorage', '$state'];
 
-    function viewController(userService, $localStorage) {
+    function viewController($localStorage, $state) {
         var vm = this;
-        vm.topUp = topUp;
         vm.user = $localStorage.user;
-        userService.getUser(vm.user)
-            .then(function (data) {
-                    vm.userData = data.data;
-                }
-                , function (err) {
-                    console.log(err);
-                });
-
-        function topUp() {
-            userService.topUp(vm.user, {account: 100})
-                .then(function (data) {
-                        vm.userData = data.data;
-                    }
-                    , function (err) {
-                        console.log(err);
-                    });
-        }
+        
 
 
     }
@@ -169,7 +197,7 @@
         return service;
         
     }
-})();;
+})();
 /**
  * Created by HP on 1/14/2017.
  */
@@ -219,7 +247,17 @@
         service.placeOrder = placeOrder;
         service.getOrders = getOrders;
         service.getOrdersForClient = getOrdersForClient;
+        service.getUndeliveredOrders = getUndeliveredOrders;
         service.changeOrderStatus = changeOrderStatus;
+        service.disActivateRefund = disActivateRefund;
+        
+        function disActivateRefund(orderId){
+            return $http.put('refund/'+ orderId);
+        }
+        
+        function getUndeliveredOrders(clientId){
+            return $http.get('discount/' + clientId);
+        }
         
         function getOrdersForClient(clientId){
             return $http.get('order/' + clientId);
@@ -278,7 +316,12 @@
         service.userAuth = userAuth;
         service.getUser = getUser;
         service.topUp = topUp;
+        service.refundPayment = refundPayment;
         return service;
+        
+        function refundPayment(user, data){
+            return $http.put('/user/refund/' + user, data);
+        }
 
         function topUp(user, data) {
             return $http.put('/user/topup/' + user, data);
@@ -302,6 +345,87 @@
  * Created by HP on 1/13/2017.
  */
 
+'use strict';
+(function () {
+    'use strict';
+
+    angular
+        .module('app')
+        .controller('accountController', accountController);
+
+    accountController.$inject = ['userService', '$localStorage', '$state', 'orderService'];
+
+    function accountController(userService, $localStorage, $state, orderService) {
+        var vm = this;
+        vm.topUp = topUp;
+        vm.user = $localStorage.user;
+        vm.faledOrders = [];
+        vm.refund = refund;
+        if (vm.user == undefined) {
+            $state.go('login');
+        }
+        else {
+            userService.getUser(vm.user)
+                .then(function (data) {
+                        console.log('got user');
+                        vm.userData = data.data;
+                        orderService.getUndeliveredOrders(vm.user)
+                            .then(function (data) {
+                                    console.log('data', data.data);
+                                    vm.faledOrders = data.data;
+                                }
+                                , function (err) {
+                                    console.log('err', err);
+                                });
+                    }
+                    , function (err) {
+                        console.log(err);
+                    });
+        }
+
+        function refund(orderId, payment, discount) {
+            orderService.disActivateRefund(orderId)
+                .then(function (data) {
+                        userService.refundPayment(vm.user, {payment: payment})
+                            .then(function (data) {
+                                    vm.userData.account = data.data.account;
+                                    vm.faledOrders.forEach(function(item){
+                                        if(item._id == orderId){
+                                            item.discount = false;
+                                        }
+                                        if(discount){
+                                            $localStorage.discount = 0.05;
+                                            $state.go('menu');
+                                        }
+                                    });
+                                }
+                                , function (err) {
+                                    console.log(err);
+                                });
+                    }
+                    , function (err) {
+                        console.log(err);
+                    })
+        }
+
+
+        function topUp() {
+            userService.topUp(vm.user, {account: 100})
+                .then(function (data) {
+                        vm.userData = data.data;
+                    }
+                    , function (err) {
+                        console.log(err);
+                    });
+        }
+
+
+    }
+})();
+/**
+ * Created by HP on 4/7/2017.
+ */
+
 (function () {
     'use strict';
 
@@ -309,28 +433,50 @@
         .module('app')
         .controller('cookController', cookController);
 
-    cookController.$inject = ['orderService', '$scope', 'socketService'];
+    cookController.$inject = ['orderService', '$scope', '$timeout'];
 
-    function cookController(orderService, $scope, socketService) {
+    function cookController(orderService, $scope, $timeout) {
         var vm = this;
-        vm.changeStatuse = changeStatuse;
-
-        socketService.on('order', function (data) {
-            console.log('data', data);
-            if (Array.isArray(vm.dishes)) {
-                vm.dishes.forEach(function(item, index){
-                    if(item._id == data._id){
-                        item.time = data.time;
+        vm.changeStatus = changeStatus;
+        setInterval(function () {
+            if (Array.isArray($scope.proceedDishes)) {
+                $scope.proceedDishes.forEach(function (meal) {
+                    if ('duration' in meal) {
+                        changeTime(meal);
                     }
                 });
+                $scope.$apply();
             }
-        });
+        }, 1000);
 
-        function changeStatuse(item) {
-            console.log('item', item);
+
+        function changeTime(meal) {
+            var now = moment();
+            if (meal.status == 1) {
+                meal.time.forEach(function (time) {
+                    if (time.status == 1) {
+                        var start = moment(time.moment);
+                        meal.duration = {
+                            seconds: now.diff(start, 'seconds') % 60,
+                            minutes: now.diff(start, 'minutes') % 60,
+                            hour: now.diff(start, 'hours') % 24,
+                            days: now.diff(start, 'days')
+                        };
+                    }
+
+                });
+                return meal.duration;
+            }
+        }
+
+        function changeStatus(item, status) {
+            item.status = status;
+            item.time.push({status: status, moment: new Date()});
             orderService.changeOrderStatus(item)
                 .then(function (res) {
-                        console.log(res)
+                        if (status == 1) {
+                            splitMeals(vm.dishes);
+                        }
                     },
                     function (err) {
                         console.log(err);
@@ -350,14 +496,36 @@
                             time: item.time
                         }
                     });
+                    splitMeals(vm.dishes);
 
-                    console.log(vm.dishes);
                 }
                 , function (err) {
                     console.log(err);
                 });
 
+        function splitMeals(meals) {
+            vm.orderedDishes = [];
+            $scope.proceedDishes = [];
+            meals.forEach(function (meal) {
+                if (meal.status == 0) {
+                    vm.orderedDishes.push(meal);
+                }
+                else {
+                    if (meal.status == 1) {
+                        meal.time.forEach(function (time) {
+                            if (time.status == 1) {
+                                if (!('duration' in meal)) {
+                                    changeTime(meal);
+                                }
+                            }
+                        });
+                    }
+                    $scope.proceedDishes.push(meal);
 
+                }
+            });
+
+        }
 
     }
 })();
@@ -447,19 +615,25 @@
     function menuController(MenuService, $localStorage, orderService, $scope, $mdDialog, $rootScope) {
         var vm = this;
         vm.makeOrder = makeOrder;
-        MenuService.getMenu(function (data) {
+        MenuService.getMenu(function (data) {            
             vm.menu = data;
         });
-
-        function makeOrder(dishId, ev) {
+        
+        function makeOrder(dishId, price, ev) {
+            var discount = $localStorage.discount;
+            if(discount){
+                price = price - price*discount;
+            }
             orderService.placeOrder({
                 userId: $localStorage.user,
                 dishId: dishId,
-                time: new Date()
+                time: new Date(),
+                payment: price
             })
                 .then(function (res) {
                         if(res.status == 200){
                             $rootScope.success = true;
+                            delete $localStorage.discount;
                             allert(ev);
                         }
                     }
@@ -469,7 +643,7 @@
                     });
         }
         $scope.customFullscreen = false;
-
+        
         function DialogController($scope, $mdDialog, $state) {
             $scope.success = function () {
                 return $rootScope.success;
@@ -477,12 +651,12 @@
             $scope.failed = function(){
                 return !$rootScope.success;
             };
-
+        
             $scope.goToAccount = function(){
                 $scope.cancel();
-                $state.go('view');
+                $state.go('account');
             }
-
+        
             $scope.cancel = function () {
                 $mdDialog.cancel();
             };
@@ -524,22 +698,34 @@
         vm.user = $localStorage.user;
         vm.status = ['Ordered', 'In Progress', 'To Delivery', 'Delivered', 'Problems to Deliver'];
         socketService.on('order', function (data) {
-            if (Array.isArray(vm.dishes)) {
+            console.log('on socket', data);
+            if (Array.isArray($scope.dishes)) {
                 var times = parseTime(data.time);
-                vm.dishes.forEach(function (item, index) {
+                $scope.dishes.forEach(function (item, index) {
                     if (item.userId == data.userId && item._id == data._id) {
                         $scope.progressReport[index].time = times;
-                        console.log('index', index);
+                        $scope.dishes[index].progress = times;
+                        $scope.dishes[index].status = data.status;
+                        console.log('$scope.dishes', $scope.dishes);
                         $scope.$digest();
                     }
                 });
             }
-            console.log('data:', data);
         });
+        setInterval(function () {
+            if (Array.isArray($scope.dishes)) {
+                $scope.dishes.forEach(function (meal) {
+                    if (meal.status < 3) {
+                        changeTime(meal);
+                    }
+                });
+                $scope.$apply();
+            }
+        }, 1000);
         orderService.getOrdersForClient(vm.user)
             .then(function (data) {
                 console.log('data', data);
-                    vm.dishes = data.data.map(function (item) {
+                    $scope.dishes = data.data.map(function (item) {
                         var times = parseTime(item.time);
                         return {
                             _id: item._id,
@@ -547,14 +733,14 @@
                             dish: item.dishes[0],
                             userId: item.userId,
                             dishId: item.dishId,
-                            time: times
+                            time: item.time,
+                            progress: times
                         }
                     });
-                    console.log('vm.dishes', vm.dishes);
-                    vm.dishes.forEach(function(item){
-                        $scope.progressReport.push({time:item.time});
+                    $scope.dishes.forEach(function(item){
+                        changeTime(item);
+                        $scope.progressReport.push({time:item.progress});
                     });
-                    console.log('$scope.progressReport', $scope.progressReport);
                 }
                 , function (err) {
                     console.log('err', err);
@@ -564,6 +750,26 @@
             return times.map(function (item) {
                 return {status: item.status, moment: moment(item.moment).format('MMMM Do, h:mm')};
             })
+        }
+
+        function changeTime(meal) {
+            var now = moment();
+            if (meal.status < 3) {
+                meal.time.forEach(function (time) {
+                    if (time.status == 0) {
+
+                        var start = moment(time.moment, moment.ISO_8601);
+                        meal.duration = {
+                            seconds: now.diff(start, 'seconds') % 60,
+                            minutes: now.diff(start, 'minutes') % 60,
+                            hour: now.diff(start, 'hours') % 24,
+                            days: now.diff(start, 'days')
+                        };
+                    }
+
+                });
+                return meal.duration;
+            }
         }
     }
 })();

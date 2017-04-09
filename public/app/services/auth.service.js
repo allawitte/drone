@@ -22,7 +22,7 @@
         return service;
         
     }
-})();;
+})();
 /**
  * Created by HP on 1/14/2017.
  */

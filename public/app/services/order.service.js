@@ -13,7 +13,17 @@
         service.placeOrder = placeOrder;
         service.getOrders = getOrders;
         service.getOrdersForClient = getOrdersForClient;
+        service.getUndeliveredOrders = getUndeliveredOrders;
         service.changeOrderStatus = changeOrderStatus;
+        service.disActivateRefund = disActivateRefund;
+        
+        function disActivateRefund(orderId){
+            return $http.put('refund/'+ orderId);
+        }
+        
+        function getUndeliveredOrders(clientId){
+            return $http.get('discount/' + clientId);
+        }
         
         function getOrdersForClient(clientId){
             return $http.get('order/' + clientId);

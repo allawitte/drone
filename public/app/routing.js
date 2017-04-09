@@ -37,14 +37,14 @@
                 controller: 'loginController',
                 templateUrl: 'app/pages/login/login.html',
                 controllerAs: 'vm',
-                id: "view"
+                id: "login"
             })
             .state('register', {
                 url: '/register',
                 controller: 'registerController',
                 templateUrl: 'app/pages/register/register.html',
                 controllerAs: 'vm',
-                id: "view"
+                id: "register"
             })
             .state('cook', {
                 url: '/cook',
@@ -53,6 +53,13 @@
                 controllerAs: 'vm',
                 id: "cook"
             })
+            .state('account', {
+            url: '/account',
+            controller: 'accountController',
+            templateUrl: 'app/pages/account/account.html',
+            controllerAs: 'vm',
+            id: "account"
+        })
 
     }
 })();

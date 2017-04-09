@@ -1,26 +1,59 @@
 <h2>Cook</h2>
 <md-content class="md-padding cook" layout="row" layout-wrap>
-    <md-card ng-repeat="item in vm.dishes" flex="30">
-        <img ng-src="{{item.dish.image}}" class="md-card-image" alt="Washed Out">
-        <md-card-title>
-            <md-card-title-text>
-                <span class="md-headline">{{item.dish.title}}</span>
-            </md-card-title-text>
-        </md-card-title>
-        <md-card-actions layout="row" layout-align="start center">
-            <md-card-icon-actions>
-                <ingredients-list ingredients="item.dish.ingredients"></ingredients-list>
-
-            </md-card-icon-actions>
-        </md-card-actions>
-        <md-card-content>
-            <md-radio-group ng-model="item.status" ng-change="vm.changeStatuse(item)">
-
-                <md-radio-button value="0" class="md-primary">Ordered</md-radio-button>
-                <md-radio-button value="1"> In Progress </md-radio-button>
-                <md-radio-button value="2">To Delivery</md-radio-button>
-
-            </md-radio-group>
-        </md-card-content>
-    </md-card>
+    <div flex="50">
+        <div class="md-headline">Ordered meals</div>
+        <md-card md-theme="{{ showDarkTheme ? 'dark-grey' : 'default' }}" md-theme-watch
+                 ng-repeat="item in vm.orderedDishes track by $index">
+            <md-card-title>
+                <md-card-title-text>
+                    <span class="md-headline">{{item.dish.title}}</span>
+                    <md-card-actions layout="row" layout-align="start center">
+                        <md-card-icon-actions>
+                            <ingredients-list ingredients="item.dish.ingredients"></ingredients-list>
+                        </md-card-icon-actions>
+                    </md-card-actions>
+                </md-card-title-text>
+                <md-card-title-media>
+                    <div class="md-media-lg card-media">
+                        <img ng-src="{{item.dish.image}}" class="md-card-image" alt="item.title">
+                    </div>
+                </md-card-title-media>
+            </md-card-title>
+            <md-card-actions layout="row" layout-align="end center">
+                <md-button ng-click="vm.changeStatus(item, 1)">Start Cook</md-button>
+            </md-card-actions>
+        </md-card>
+    </div>
+    <div flex="50">
+        <div class="md-headline">Proceeded meals</div>
+        <md-card md-theme="{{ showDarkTheme ? 'dark-grey' : 'default' }}" md-theme-watch
+                 ng-repeat="item in proceedDishes track by $index">
+            <md-card-title>
+                <md-card-title-text>
+                    <span class="md-headline">{{item.dish.title}}</span>
+                    <md-card-actions layout="row" layout-align="start center">
+                        <md-card-icon-actions>
+                            <ingredients-list ingredients="item.dish.ingredients"></ingredients-list>
+                        </md-card-icon-actions>
+                    </md-card-actions>
+                </md-card-title-text>
+                <md-card-title-media>
+                    <div class="md-media-lg card-media">
+                        <img ng-src="{{item.dish.image}}" class="md-card-image" alt="item.title">
+                        <div class="md-subhead">Cooking duration</div>
+                        <div class="md-whiteframe-1dp">
+                            <span>{{item.duration.days}}</span>&nbsp;&nbsp;
+                            <span>{{item.duration.hour}}&nbsp;:&nbsp;</span>
+                            <span>{{item.duration.minutes}}&nbsp;:&nbsp;</span>
+                            <span>{{item.duration.seconds}}</span>
+                        </div>
+                    </div>
+                </md-card-title-media>
+            </md-card-title>
+            </md-card-title>
+            <md-card-actions layout="row" layout-align="end center">
+                <md-button ng-click="vm.changeStatus(item, 2)" ng-disabled="item.status == 2">Ready</md-button>
+            </md-card-actions>
+        </md-card>
+    </div>
 </md-content>

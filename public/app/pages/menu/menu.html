@@ -11,7 +11,7 @@
                 <span ng-repeat="ingredient in item.ingredients track by $index">{{ingredient}}&nbsp;</span>
             </p>
         </div>
-        <md-button class="md-raised md-warn" ng-click="vm.makeOrder(item.id, $event)">Make Order</md-button>
+        <md-button class="md-raised md-warn" ng-click="vm.makeOrder(item.id, item.price, $event)">Make Order</md-button>
     </md-list-item>
     <md-divider ></md-divider>
 

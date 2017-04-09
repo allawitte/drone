@@ -7,28 +7,41 @@
     <title>Dron Cafe</title>
 
 </head>
-<body ng-controller="MainController">
+<body ng-controller="MainController as vm" ng-class="{bg}">
 <div class="container-fluid">
-    <nav class="navbar navbar-default">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <a class="navbar-brand" ui-sref="/">
-                    Drone Cafe
-                </a>
-            </div>
-            <ul class="nav navbar-nav navbar-right">
-                <li ng-if="!isLogged"><a ui-sref="login">Login</a></li>
-                <li ng-if="isLogged"><a href="javascript:void(0)" ng-click="logOut()">Log Out</a></li>
-                <li><a ui-sref="register">Register</a></li>
-                <li><a ui-sref="cook">Cook</a></li>
-            </ul>
-        </div>
-    </nav>
     <md-nav-bar md-selected-nav-item="currentNavItem" nav-bar-aria-label="navigation links">
-        <md-nav-item md-nav-sref="view" name="view" value="view">View</md-nav-item>
-        <md-nav-item md-nav-sref="menu" name="menu" value="menu">Menu</md-nav-item>
-        <md-nav-item md-nav-sref="order({userId: vm.userId})" name="order" value="order">Order</md-nav-item>
+        <md-nav-item md-nav-sref="view" name="view" value="view">Home</md-nav-item>
+        <md-nav-item md-nav-sref="cook" name="cook" value="cook">Cook</md-nav-item>
+        <md-nav-item md-nav-sref="register" name="register" value="register">Sing Up For Free</md-nav-item>
+        <md-nav-item md-nav-sref="login" name="login" value="login" ng-if="!isLogged">Login</md-nav-item>
+        <md-button ng-if="isLogged" ng-click="logOut()">Log Out</md-button>
+        <md-menu-bar>
+            <md-menu ng-if="isLogged">
+                <md-button ng-click="$mdOpenMenu()" class="md-icon-button" aria-label="Open sample menu">
+                    Me
+                </md-button>
+                <md-menu-content>
+                    <md-menu-item>
+                        <md-button ng-click="vm.goTo('account')">
+                            Account
+                        </md-button>
+                    </md-menu-item>
+                    <md-menu-item>
+                        <md-button ng-click="vm.goTo('order')">
+                            My Orders
+                        </md-button>
+                    </md-menu-item>
+                    <md-menu-item>
+                        <md-button ng-click="vm.goTo('menu')">
+                            Menu
+                        </md-button>
+                    </md-menu-item>
+                </md-menu-content>
+            </md-menu>
+        </md-menu-bar>
     </md-nav-bar>
+
+
     <ui-view></ui-view>
 </div>
 </body>

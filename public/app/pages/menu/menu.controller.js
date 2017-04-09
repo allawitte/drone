@@ -10,19 +10,25 @@
     function menuController(MenuService, $localStorage, orderService, $scope, $mdDialog, $rootScope) {
         var vm = this;
         vm.makeOrder = makeOrder;
-        MenuService.getMenu(function (data) {
+        MenuService.getMenu(function (data) {            
             vm.menu = data;
         });
-
-        function makeOrder(dishId, ev) {
+        
+        function makeOrder(dishId, price, ev) {
+            var discount = $localStorage.discount;
+            if(discount){
+                price = price - price*discount;
+            }
             orderService.placeOrder({
                 userId: $localStorage.user,
                 dishId: dishId,
-                time: new Date()
+                time: new Date(),
+                payment: price
             })
                 .then(function (res) {
                         if(res.status == 200){
                             $rootScope.success = true;
+                            delete $localStorage.discount;
                             allert(ev);
                         }
                     }
@@ -32,7 +38,7 @@
                     });
         }
         $scope.customFullscreen = false;
-
+        
         function DialogController($scope, $mdDialog, $state) {
             $scope.success = function () {
                 return $rootScope.success;
@@ -40,12 +46,12 @@
             $scope.failed = function(){
                 return !$rootScope.success;
             };
-
+        
             $scope.goToAccount = function(){
                 $scope.cancel();
-                $state.go('view');
+                $state.go('account');
             }
-
+        
             $scope.cancel = function () {
                 $mdDialog.cancel();
             };

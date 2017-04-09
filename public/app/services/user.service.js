@@ -14,7 +14,12 @@
         service.userAuth = userAuth;
         service.getUser = getUser;
         service.topUp = topUp;
+        service.refundPayment = refundPayment;
         return service;
+        
+        function refundPayment(user, data){
+            return $http.put('/user/refund/' + user, data);
+        }
 
         function topUp(user, data) {
             return $http.put('/user/topup/' + user, data);

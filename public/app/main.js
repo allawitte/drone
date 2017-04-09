@@ -1,4 +1,4 @@
-(function(){
+(function () {
     'use strict';
     angular.module('app', ['ui.router', 'ngMaterial', 'ngMdIcons', 'ngMessages', 'ngStorage']);
 })();

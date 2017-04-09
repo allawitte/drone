@@ -6,7 +6,9 @@ var orderSchema = Schema({
     userId: String,
     dishId: Number,
     status: Number,
-    time: Array
+    time: Array,
+    discount: Boolean,
+    payment: Number
 },{collection: 'orders'});
 
 var Order = mongoose.model('orders', orderSchema);
