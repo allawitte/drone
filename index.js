@@ -13,6 +13,8 @@ mongoose.Promise = require('bluebird');
 
 var config = require('./config'); // get our config file
 var router = require('./router');
+var setMenu = require('./server/modules/menulist').setMenu;
+setMenu();
 
 app.set('port', process.env.PORT || config.port);
 //mongoose.connect(config.database); // connect to database
